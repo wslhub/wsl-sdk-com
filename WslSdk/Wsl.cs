@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using WslSdk.Interop;
+using WslSdk.Models;
 
 namespace WslSdk
 {

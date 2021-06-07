@@ -2,6 +2,9 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using WslSdk.Contracts;
+using WslSdk.Interop;
+using WslSdk.Models;
 
 namespace WslSdk
 {
@@ -13,13 +16,13 @@ namespace WslSdk
         public WslService()
         {
             // Increment the lock count of objects in the COM server.
-            ExecutableComServer.Instance.Lock();
+            WslComServer.Instance.Lock();
         }
 
         ~WslService()
         {
             // Decrement the lock count of objects in the COM server.
-            ExecutableComServer.Instance.Unlock();
+            WslComServer.Instance.Unlock();
         }
 
         public bool IsDistroRegistered(string distroName)

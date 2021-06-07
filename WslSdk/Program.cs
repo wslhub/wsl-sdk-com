@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using WslSdk.Interop;
 
 namespace WslSdk
 {
@@ -27,7 +28,7 @@ namespace WslSdk
             Console.WriteLine(string.Join(", ", args));
 
             // Run the out-of-process COM server
-            ExecutableComServer.Instance.Run();
+            WslComServer.Instance.Run();
         }
     }
 }

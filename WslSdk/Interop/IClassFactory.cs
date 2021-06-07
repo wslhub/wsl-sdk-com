@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace WslSdk
+namespace WslSdk.Interop
 {
     /// <summary>
     /// You must implement this interface for every class that you register in 

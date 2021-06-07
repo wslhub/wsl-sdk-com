@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using WslSdk.Contracts;
+using WslSdk.Interop;
 
 namespace WslSdk
 {

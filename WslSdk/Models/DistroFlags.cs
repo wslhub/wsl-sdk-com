@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace WslSdk
+namespace WslSdk.Models
 {
     /// <summary>
     /// The enumeration specifies the behavior of a distribution in the Windows Subsystem for Linux (WSL).

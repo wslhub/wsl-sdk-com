@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D7F307D4-173B-4440-AB23-71795BF66CFA}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>WslSdk</RootNamespace>
     <AssemblyName>WslSdk</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -73,14 +73,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DistroFlags.cs" />
-    <Compile Include="DistroInfo.cs" />
-    <Compile Include="DistroRegistryInfo.cs" />
-    <Compile Include="ExecutableComServer.cs" />
-    <Compile Include="HelperMethods.cs" />
-    <Compile Include="IClassFactory.cs" />
-    <Compile Include="IWslService.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Models\DistroFlags.cs" />
+    <Compile Include="Models\DistroInfo.cs" />
+    <Compile Include="Models\DistroRegistryInfo.cs" />
+    <Compile Include="WslComServer.cs" />
+    <Compile Include="Interop\HelperMethods.cs" />
+    <Compile Include="Interop\IClassFactory.cs" />
+    <Compile Include="Contracts\IWslService.cs" />
+    <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Wsl.cs" />

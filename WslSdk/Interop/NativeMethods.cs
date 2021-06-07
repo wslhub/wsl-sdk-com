@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using WslSdk.Models;
 
-namespace WslSdk
+namespace WslSdk.Interop
 {
     /// <summary>
     /// Native methods

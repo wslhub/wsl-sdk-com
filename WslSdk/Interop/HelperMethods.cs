@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace WslSdk
+namespace WslSdk.Interop
 {
     internal static class HelperMethods
     {

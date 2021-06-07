@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace WslSdk
+namespace WslSdk.Models
 {
     /// <summary>
     /// A model class that represents information about the WSL distribution registered in the registry.

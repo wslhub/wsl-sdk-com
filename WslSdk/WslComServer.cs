@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Threading;
+using WslSdk.Interop;
 
 namespace WslSdk
 {
-    internal sealed class ExecutableComServer
+    internal sealed class WslComServer
     {
-        private ExecutableComServer() { }
+        private WslComServer() { }
 
-        private static ExecutableComServer _instance = new ExecutableComServer();
+        private static WslComServer _instance = new WslComServer();
 
-        public static ExecutableComServer Instance
+        public static WslComServer Instance
         {
             get { return _instance; }
         }
