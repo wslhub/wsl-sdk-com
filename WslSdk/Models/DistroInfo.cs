@@ -10,6 +10,7 @@ namespace WslSdk.Models
     /// A model class that contains information obtained by calling the WSL API in addition to information read from the registry.
     /// </summary>
     [ComVisible(true)]
+    [Guid("61C39009-D5E4-46D4-A306-113A5D459803")]
     public sealed class DistroInfo : DistroRegistryInfo
     {
         /// <summary>

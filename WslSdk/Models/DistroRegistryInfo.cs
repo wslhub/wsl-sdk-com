@@ -10,6 +10,7 @@ namespace WslSdk.Models
     /// A model class that represents information about the WSL distribution registered in the registry.
     /// </summary>
     [ComVisible(true)]
+    [Guid("5F695373-2BAB-4B0C-A53D-2AE6F5024E44")]
     public class DistroRegistryInfo
     {
         /// <summary>

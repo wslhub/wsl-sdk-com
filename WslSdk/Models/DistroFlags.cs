@@ -8,6 +8,7 @@ namespace WslSdk.Models
     /// </summary>
     [Flags]
     [ComVisible(true)]
+    [Guid("425A3FA7-029E-4241-A248-4EA6368770D4")]
     public enum DistroFlags : int
     {
         /// <summary>
