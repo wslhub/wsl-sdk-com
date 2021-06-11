@@ -9,6 +9,7 @@ using WslSdk.Models;
 namespace WslSdk
 {
     [ComVisible(true)]
+    [ProgId("WslSdk.WslService")]
     [Guid("1D0D99B6-AF95-4D3F-B55B-BA17CB2D549B")]
     [ClassInterface(ClassInterfaceType.AutoDispatch)]
     public class WslService : IWslService
