@@ -15,5 +15,31 @@ namespace WslSdk.Contracts
         string[] GetDistroList();
 
         string RunWslCommand(string distroName, string commandLine);
+
+        DistroRegistryInfo GetDistroInfo(string distroName);
+
+        string GetDefaultDistroName();
+
+        DistroInfo GetDistroInfoEx(string distroName);
+
+        void SetDefaultUid(string distroName, int defaultUid);
+
+        DistroFlags GetDistroFlags(string distroName);
+
+        void SetDistroFlags(string distroName, DistroFlags distroFlags);
+
+        void RegisterDistro(string newDistroName, string tarGzipFilePath);
+
+        void UnregisterDistro(string existingDistroName);
+
+        string GetWslWindowsPath(string distroName);
+
+        string TranslateToWindowsPath(string distroName, string linuxPath);
+
+        string TranslateToLinuxPath(string distroName, string windowsPath);
+
+        string CreateDriveMapping(string distroName, string desiredDriveLetter);
+
+        string CreateSymbolicLink(string distroName, string desiredPath, string symbolicLinkName);
     }
 }

@@ -46,6 +46,71 @@ namespace WslSdk
             return Wsl.RunWslCommand(distroName, commandLine);
         }
 
+        public DistroRegistryInfo GetDistroInfo(string distroName)
+        {
+            return Wsl.GetDistroListFromRegistry().Where(x => string.Equals(distroName, x.DistroName, StringComparison.Ordinal)).SingleOrDefault();
+        }
+
+        public string GetDefaultDistroName()
+        {
+            return Wsl.GetDefaultDistro()?.DistroName;
+        }
+
+        public DistroInfo GetDistroInfoEx(string distroName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetDefaultUid(string distroName, int defaultUid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DistroFlags GetDistroFlags(string distroName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetDistroFlags(string distroName, DistroFlags distroFlags)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegisterDistro(string newDistroName, string tarGzipFilePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UnregisterDistro(string existingDistroName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetWslWindowsPath(string distroName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string TranslateToWindowsPath(string distroName, string linuxPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string TranslateToLinuxPath(string distroName, string windowsPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string CreateDriveMapping(string distroName, string desiredDriveLetter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string CreateSymbolicLink(string distroName, string desiredPath, string symbolicLinkName)
+        {
+            throw new NotImplementedException();
+        }
+
         // These routines perform the additional COM registration needed by 
         // the service.
 
