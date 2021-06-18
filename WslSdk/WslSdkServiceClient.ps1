@@ -1,3 +1,4 @@
+$ErrorActionPreference = "Stop"
 $obj = New-Object -ComObject 'WslSdk.WslService'
 
 Write-Output 'A WslSdk.WslService object is created'
