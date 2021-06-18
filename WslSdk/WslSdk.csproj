@@ -89,26 +89,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="WslSdkServiceClient.ps1" />
+    <Content Include="Install.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Uninstall.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WslSdkServiceClient.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>%25windir%25\system32\net.exe session &gt;nul 2&gt;&amp;1
-if not %25errorLevel%25 == 0 (
-  echo Failure: Current permissions inadequate
-  exit 1
-)
-if "$(PlatformName)"=="x64" (
-  set regasm=%25windir%25\Microsoft.NET\Framework64\v4.0.30319\regasm.exe
-) else if "$(PlatformName)"=="x86" (
-  set regasm=%25windir%25\Microsoft.NET\Framework\v4.0.30319\regasm.exe
-) else (
-  echo Failure: Cannot determine platform
-  exit 2
-)
-echo Generate and register type library.
-%25regasm%25 /tlb "$(TargetPath)"
-echo Register the component.
-%25regasm%25 "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
