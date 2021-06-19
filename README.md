@@ -23,3 +23,4 @@ You can use this OOP-style COM server to query and run WSL commands via the Wind
 - Finalize v1 COM Interface
 - Make v1 COM Interface documentation
 - Make viable code samples with multiple programming languages which support COM client (such as PowerShell, LINQPad 5+, Delphi, Python, etc.)
+- Add ARM64 Support
