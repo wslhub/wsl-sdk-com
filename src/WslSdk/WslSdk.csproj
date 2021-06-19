@@ -76,6 +76,7 @@
     <Compile Include="Models\DistroFlags.cs" />
     <Compile Include="Models\DistroInfo.cs" />
     <Compile Include="Models\DistroRegistryInfo.cs" />
+    <Compile Include="NamesGenerator.cs" />
     <Compile Include="WslComServer.cs" />
     <Compile Include="Interop\HelperMethods.cs" />
     <Compile Include="Interop\IClassFactory.cs" />

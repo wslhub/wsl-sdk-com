@@ -71,6 +71,11 @@ namespace WslSdk
             return Wsl.SetDistroConfiguration(distroName, null, distroFlags);
         }
 
+        public string GenerateRandomName(bool addNumberPostfix)
+        {
+            return NamesGenerator.GetRandomName(addNumberPostfix ? 1 : 0);
+        }
+
         public bool RegisterDistro(string newDistroName, string tarGzipFilePath)
         {
             return Wsl.RegisterDistro(newDistroName, tarGzipFilePath);

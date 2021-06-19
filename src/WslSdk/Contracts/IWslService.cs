@@ -26,6 +26,8 @@ namespace WslSdk.Contracts
 
         bool SetDistroFlags(string distroName, DistroFlags distroFlags);
 
+        string GenerateRandomName(bool addNumberPostfix);
+
         bool RegisterDistro(string newDistroName, string tarGzipFilePath);
 
         bool UnregisterDistro(string existingDistroName);

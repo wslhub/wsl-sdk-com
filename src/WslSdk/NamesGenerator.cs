@@ -2,7 +2,7 @@
 
 // This code excerpted from https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go ;-)
 
-namespace WslSdk.Test
+namespace WslSdk
 {
     internal static class NamesGenerator
     {

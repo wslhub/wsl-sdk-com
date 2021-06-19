@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace WslSdk.Test
 {
@@ -16,20 +16,22 @@ namespace WslSdk.Test
         }
 
         [TestMethod]
-        public void Test_RandomNameGenerator()
+        public void Test_GenerateRandomName()
         {
-            var candidates = new List<string>(100);
-            for (int i = 0; i < candidates.Capacity; i++)
-                candidates.Add(NamesGenerator.GetRandomName(1));
+            dynamic wslService = ActivateWslService();
 
-            Assert.IsTrue(candidates.Count > 0);
+            var withoutPostfix = wslService.GenerateRandomName(false);
+            var withPostfix = wslService.GenerateRandomName(true);
+
+            Assert.IsFalse(Regex.IsMatch(withoutPostfix, "[0-9]+$"));
+            Assert.IsTrue(Regex.IsMatch(withPostfix, "[0-9]+$"));
         }
 
         [TestMethod]
         public void Test_DistroRegisterUnregister()
         {
             dynamic wslService = ActivateWslService();
-            var randomName = NamesGenerator.GetRandomName(1);
+            var randomName = wslService.GenerateRandomName(true);
             var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
 
             var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile);
@@ -46,7 +48,7 @@ namespace WslSdk.Test
         public void Test_DistroConfigurationChange()
         {
             dynamic wslService = ActivateWslService();
-            var randomName = NamesGenerator.GetRandomName(1);
+            var randomName = wslService.GenerateRandomName(true);
             var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
 
             var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile);
