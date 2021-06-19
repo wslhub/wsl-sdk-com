@@ -52,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DistroEnumTest.cs" />
+    <Compile Include="DistroManipTest.cs" />
+    <Compile Include="NamesGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

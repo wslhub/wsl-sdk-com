@@ -61,24 +61,24 @@ namespace WslSdk
             return Wsl.QueryDistro(distroName);
         }
 
-        public void SetDefaultUid(string distroName, int defaultUid)
+        public bool SetDefaultUid(string distroName, int defaultUid)
         {
-            throw new NotImplementedException();
+            return Wsl.SetDistroConfiguration(distroName, defaultUid, null);
         }
 
-        public void SetDistroFlags(string distroName, DistroFlags distroFlags)
+        public bool SetDistroFlags(string distroName, DistroFlags distroFlags)
         {
-            throw new NotImplementedException();
+            return Wsl.SetDistroConfiguration(distroName, null, distroFlags);
         }
 
-        public void RegisterDistro(string newDistroName, string tarGzipFilePath)
+        public bool RegisterDistro(string newDistroName, string tarGzipFilePath)
         {
-            throw new NotImplementedException();
+            return Wsl.RegisterDistro(newDistroName, tarGzipFilePath);
         }
 
-        public void UnregisterDistro(string existingDistroName)
+        public bool UnregisterDistro(string existingDistroName)
         {
-            throw new NotImplementedException();
+            return Wsl.UnregisterDistro(existingDistroName);
         }
 
         public string GetWslWindowsPath(string distroName)

@@ -195,6 +195,34 @@ namespace WslSdk
             return distro;
         }
 
+        public static bool SetDistroConfiguration(string distroName, int? defaultUid, DistroFlags? distroFlags)
+        {
+            var currentConfig = QueryDistro(distroName);
+            var newDefaultUid = currentConfig.DefaultUid;
+            var newFlags = currentConfig.DistroFlags;
+
+            if (defaultUid.HasValue)
+                newDefaultUid = defaultUid.Value;
+
+            if (distroFlags.HasValue)
+                newFlags = distroFlags.Value;
+
+            return NativeMethods.WslConfigureDistribution(distroName, newDefaultUid, newFlags) == 0;
+        }
+
+        public static bool RegisterDistro(string distroName, string tarGzipFilePath)
+        {
+            if (!File.Exists(tarGzipFilePath))
+                return false;
+
+            return NativeMethods.WslRegisterDistribution(distroName, tarGzipFilePath) == 0;
+        }
+
+        public static bool UnregisterDistro(string distroName)
+        {
+            return NativeMethods.WslUnregisterDistribution(distroName) == 0;
+        }
+
         /// <summary>
         /// Get details of WSL distributions reported as installed on the system by calling the WSL API.
         /// </summary>

@@ -22,13 +22,13 @@ namespace WslSdk.Contracts
 
         DistroInfo QueryDistroInfo(string distroName);
 
-        void SetDefaultUid(string distroName, int defaultUid);
+        bool SetDefaultUid(string distroName, int defaultUid);
 
-        void SetDistroFlags(string distroName, DistroFlags distroFlags);
+        bool SetDistroFlags(string distroName, DistroFlags distroFlags);
 
-        void RegisterDistro(string newDistroName, string tarGzipFilePath);
+        bool RegisterDistro(string newDistroName, string tarGzipFilePath);
 
-        void UnregisterDistro(string existingDistroName);
+        bool UnregisterDistro(string existingDistroName);
 
         string GetWslWindowsPath(string distroName);
 

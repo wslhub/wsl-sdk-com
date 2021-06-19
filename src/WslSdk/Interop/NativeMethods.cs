@@ -316,9 +316,9 @@ namespace WslSdk.Interop
             PreserveSig = true)]
         public static extern int WslGetDistributionConfiguration(
             string distributionName,
-            [MarshalAs(UnmanagedType.I4)] out int distributionVersion,
-            [MarshalAs(UnmanagedType.I4)] out int defaultUID,
-            [MarshalAs(UnmanagedType.I4)] out DistroFlags wslDistributionFlags,
+            [Out, MarshalAs(UnmanagedType.I4)] out int distributionVersion,
+            [Out, MarshalAs(UnmanagedType.I4)] out int defaultUID,
+            [Out, MarshalAs(UnmanagedType.I4)] out DistroFlags wslDistributionFlags,
             out IntPtr defaultEnvironmentVariables,
             [MarshalAs(UnmanagedType.I4)] out int defaultEnvironmentVariableCount);
 
@@ -332,11 +332,57 @@ namespace WslSdk.Interop
         public static extern int WslLaunch(
             string distributionName,
             string command,
-            bool useCurrentWorkingDirectory,
+            [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory,
             IntPtr stdIn,
             IntPtr stdOut,
             IntPtr stdErr,
             out IntPtr process);
+
+        [SecurityCritical]
+        [DllImport("wslapi.dll",
+            CallingConvention = CallingConvention.Winapi,
+            CharSet = CharSet.Unicode,
+            ExactSpelling = true,
+            PreserveSig = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern int WslLaunchInteractive(
+            string distributionName,
+            string command,
+            [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory,
+            [Out, MarshalAs(UnmanagedType.U4)] out int exitCode);
+
+        [SecurityCritical]
+        [DllImport("wslapi.dll",
+            CallingConvention = CallingConvention.Winapi,
+            CharSet = CharSet.Unicode,
+            ExactSpelling = true,
+            PreserveSig = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern int WslConfigureDistribution(
+            string distributionName,
+            [MarshalAs(UnmanagedType.I4)] int defaultUID,
+            [MarshalAs(UnmanagedType.I4)] DistroFlags wslDistributionFlags);
+
+        [SecurityCritical]
+        [DllImport("wslapi.dll",
+            CallingConvention = CallingConvention.Winapi,
+            CharSet = CharSet.Unicode,
+            ExactSpelling = true,
+            PreserveSig = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern int WslRegisterDistribution(
+            string distributionName,
+            string tarGzFilename);
+
+        [SecurityCritical]
+        [DllImport("wslapi.dll",
+            CallingConvention = CallingConvention.Winapi,
+            CharSet = CharSet.Unicode,
+            ExactSpelling = true,
+            PreserveSig = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern int WslUnregisterDistribution(
+            string distributionName);
 
         public static readonly int
             E_INVALIDARG = unchecked((int)0x80070057);
