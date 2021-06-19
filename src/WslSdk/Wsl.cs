@@ -34,7 +34,7 @@ namespace WslSdk
                 return null;
 
             var basePath = distroKey.GetValue("BasePath", default(string)) as string;
-            var normalizedPath = Path.GetFullPath(basePath);
+            var normalizedPath = Path.GetFullPath(basePath.Replace("\\\\?\\", string.Empty));
 
             var kernelCommandLine = (distroKey.GetValue("KernelCommandLine", default(string)) as string ?? string.Empty);
 
