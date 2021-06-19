@@ -99,11 +99,13 @@ namespace WslSdk
 
         public string TranslateToWindowsPath(string distroName, string linuxPath)
         {
+            // Implementation decision: use wslpath to maintain consistency
             throw new NotImplementedException();
         }
 
         public string TranslateToLinuxPath(string distroName, string windowsPath)
         {
+            // Implementation decision: use wslpath to maintain consistency
             throw new NotImplementedException();
         }
 
