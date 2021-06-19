@@ -33,12 +33,12 @@ namespace WslSdk
 
         public DistroRegistryInfo GetDefaultDistro()
         {
-            return Wsl.GetDefaultDistro();
+            return Wsl.GetDefaultDistroFromRegistry();
         }
 
         public string[] GetDistroList()
         {
-            return Wsl.GetDistroListFromRegistry().Select(x => x.DistroName).ToArray();
+            return Wsl.EnumerateDistroFromRegistry().Select(x => x.DistroName).ToArray();
         }
 
         public string RunWslCommand(string distroName, string commandLine)
@@ -48,17 +48,17 @@ namespace WslSdk
 
         public DistroRegistryInfo GetDistroInfo(string distroName)
         {
-            return Wsl.GetDistroListFromRegistry().Where(x => string.Equals(distroName, x.DistroName, StringComparison.Ordinal)).SingleOrDefault();
+            return Wsl.GetDistroFromRegistry(distroName);
         }
 
         public string GetDefaultDistroName()
         {
-            return Wsl.GetDefaultDistro()?.DistroName;
+            return Wsl.GetDefaultDistroFromRegistry()?.DistroName;
         }
 
-        public DistroInfo GetDistroInfoEx(string distroName)
+        public DistroInfo QueryDistroInfo(string distroName)
         {
-            throw new NotImplementedException();
+            return Wsl.QueryDistro(distroName);
         }
 
         public void SetDefaultUid(string distroName, int defaultUid)

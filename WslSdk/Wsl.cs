@@ -12,47 +12,49 @@ namespace WslSdk
 {
     internal static class Wsl
     {
+        private static Guid GetDefaultDistroGuid(RegistryKey lxssKey)
+        {
+            return Guid.Parse(lxssKey.GetValue("DefaultDistribution", default(string)) as string);
+        }
+
         /// <summary>
         /// Reads WSL-related information from a registry key and returns it as a model object.
         /// </summary>
-        /// <param name="lxssKey">Registry key from which to read information.</param>
-        /// <param name="keyName">The GUID name under the LXSS registry key.</param>
+        /// <param name="distroKey">Registry key from which to read information.</param>
         /// <param name="parsedDefaultGuid">Default distribution's GUID key as recorded in the LXSS registry key.</param>
         /// <returns>Returns the WSL distribution information obtained through registry information.</returns>
-        private static DistroRegistryInfo ReadFromRegistryKey(RegistryKey lxssKey, string keyName, Guid? parsedDefaultGuid)
+        private static DistroRegistryInfo ReadFromRegistryKey(RegistryKey distroKey, Guid parsedDefaultGuid)
         {
-            if (!Guid.TryParse(keyName, out Guid parsedGuid))
+            if (!Guid.TryParse(Path.GetFileName(distroKey.Name), out Guid parsedGuid))
                 return null;
 
-            using (var distroKey = lxssKey.OpenSubKey(keyName))
+            var distroName = distroKey.GetValue("DistributionName", default(string)) as string;
+
+            if (string.IsNullOrWhiteSpace(distroName))
+                return null;
+
+            var basePath = distroKey.GetValue("BasePath", default(string)) as string;
+            var normalizedPath = Path.GetFullPath(basePath);
+
+            var kernelCommandLine = (distroKey.GetValue("KernelCommandLine", default(string)) as string ?? string.Empty);
+
+            return new DistroRegistryInfo()
             {
-                var distroName = distroKey.GetValue("DistributionName", default(string)) as string;
-
-                if (string.IsNullOrWhiteSpace(distroName))
-                    return null;
-
-                var basePath = distroKey.GetValue("BasePath", default(string)) as string;
-                var normalizedPath = Path.GetFullPath(basePath);
-
-                var kernelCommandLine = (distroKey.GetValue("KernelCommandLine", default(string)) as string ?? string.Empty);
-                var result = new DistroRegistryInfo()
-                {
-                    DistroId = parsedGuid.ToString(),
-                    DistroName = distroName,
-                    BasePath = normalizedPath,
-                };
-                result.KernelCommandLine = kernelCommandLine.Split(
+                DistroId = parsedGuid.ToString(),
+                DistroName = distroName,
+                BasePath = normalizedPath,
+                IsDefault = (parsedDefaultGuid == parsedGuid),
+                KernelCommandLine = kernelCommandLine.Split(
                     new char[] { ' ', '\t', },
-                    StringSplitOptions.RemoveEmptyEntries);
+                    StringSplitOptions.RemoveEmptyEntries),
+            };
+        }
 
-                if (parsedDefaultGuid.HasValue && parsedDefaultGuid == parsedGuid)
-                {
-                    result.IsDefault = true;
-                    return result;
-                }
-            }
-
-            return null;
+        private static RegistryKey OpenLxssRegistryKey()
+        {
+            return Registry.CurrentUser.OpenSubKey(
+                Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss"),
+                false);
         }
 
         /// <summary>
@@ -62,26 +64,48 @@ namespace WslSdk
         /// Returns default WSL distribution information obtained through registry information.
         /// Returns null if no WSL distro is installed or no distro is set as the default.
         /// </returns>
-        public static DistroRegistryInfo GetDefaultDistro()
+        public static DistroRegistryInfo GetDefaultDistroFromRegistry()
         {
-            var currentUser = Registry.CurrentUser;
-            var lxssPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-
-            using (var lxssKey = currentUser.OpenSubKey(lxssPath, false))
+            using (var lxssKey = OpenLxssRegistryKey())
             {
-                var defaultGuid = Guid.TryParse(
-                    lxssKey.GetValue("DefaultDistribution", default(string)) as string,
-                    out Guid parsedDefaultGuid) ? parsedDefaultGuid : default(Guid?);
+                var defaultGuid = GetDefaultDistroGuid(lxssKey);
 
                 foreach (var keyName in lxssKey.GetSubKeyNames())
                 {
-                    var info = ReadFromRegistryKey(lxssKey, keyName, defaultGuid);
+                    using (var eachDistroKey = lxssKey.OpenSubKey(keyName))
+                    {
+                        var info = ReadFromRegistryKey(eachDistroKey, defaultGuid);
 
-                    if (info == null)
-                        continue;
+                        if (info == null)
+                            continue;
 
-                    if (info.IsDefault)
-                        return info;
+                        if (info.IsDefault)
+                            return info;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static DistroRegistryInfo GetDistroFromRegistry(string distroName)
+        {
+            using (var lxssKey = OpenLxssRegistryKey())
+            {
+                var defaultGuid = GetDefaultDistroGuid(lxssKey);
+
+                foreach (var keyName in lxssKey.GetSubKeyNames())
+                {
+                    using (var eachDistroKey = lxssKey.OpenSubKey(keyName))
+                    {
+                        var info = ReadFromRegistryKey(eachDistroKey, defaultGuid);
+
+                        if (info == null)
+                            continue;
+
+                        if (string.Equals(info.DistroName, distroName, StringComparison.Ordinal))
+                            return info;
+                    }
                 }
             }
 
@@ -92,83 +116,93 @@ namespace WslSdk
         /// Returns information about WSL distributions obtained from the registry without calling the WSL API.
         /// </summary>
         /// <returns>Returns a list of information about the searched WSL distributions.</returns>
-        public static IEnumerable<DistroRegistryInfo> GetDistroListFromRegistry()
+        public static IEnumerable<DistroRegistryInfo> EnumerateDistroFromRegistry()
         {
-            var currentUser = Registry.CurrentUser;
-            var lxssPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-
-            using (var lxssKey = currentUser.OpenSubKey(lxssPath, false))
+            using (var lxssKey = OpenLxssRegistryKey())
             {
-                var defaultGuid = Guid.TryParse(
-                    lxssKey.GetValue("DefaultDistribution", default(string)) as string,
-                    out Guid parsedDefaultGuid) ? parsedDefaultGuid : default(Guid?);
+                var defaultGuid = GetDefaultDistroGuid(lxssKey);
 
                 foreach (var keyName in lxssKey.GetSubKeyNames())
                 {
-                    var info = ReadFromRegistryKey(lxssKey, keyName, defaultGuid);
+                    using (var eachDistroKey = lxssKey.OpenSubKey(keyName))
+                    {
+                        var info = ReadFromRegistryKey(eachDistroKey, defaultGuid);
 
-                    if (info == null)
-                        continue;
+                        if (info == null)
+                            continue;
 
-                    if (info.IsDefault)
-                        yield return info;
+                        if (info.IsDefault)
+                            yield return info;
+                    }
                 }
             }
+        }
+
+        public static DistroInfo QueryDefaultDistro()
+        {
+            return QueryDistro(GetDefaultDistroFromRegistry());
+        }
+
+        public static DistroInfo QueryDistro(string distroName)
+        {
+            return QueryDistro(GetDistroFromRegistry(distroName));
+        }
+
+        public unsafe static DistroInfo QueryDistro(DistroRegistryInfo registryInfoItem)
+        {
+            if (registryInfoItem == null)
+                return null;
+
+            var distro = new DistroInfo()
+            {
+                DistroId = registryInfoItem.DistroId,
+                DistroName = registryInfoItem.DistroName,
+                BasePath = registryInfoItem.BasePath,
+            };
+
+            distro.KernelCommandLine = registryInfoItem.KernelCommandLine;
+            distro.IsRegistered = NativeMethods.WslIsDistributionRegistered(registryInfoItem.DistroName);
+
+            if (!distro.IsRegistered)
+                return null;
+
+            var hr = NativeMethods.WslGetDistributionConfiguration(
+                registryInfoItem.DistroName,
+                out int distroVersion,
+                out int defaultUserId,
+                out DistroFlags flags,
+                out IntPtr environmentVariables,
+                out int environmentVariableCount);
+
+            if (hr != 0)
+                return null;
+
+            distro.WslVersion = distroVersion;
+            distro.DefaultUid = defaultUserId;
+            distro.DistroFlags = flags;
+
+            var lpEnvironmentVariables = (byte***)environmentVariables.ToPointer();
+
+            for (int i = 0; i < environmentVariableCount; i++)
+            {
+                byte** lpArray = lpEnvironmentVariables[i];
+                var content = Marshal.PtrToStringAnsi(new IntPtr(lpArray));
+                distro.DefaultEnvironmentVariables.Add(content);
+                Marshal.FreeCoTaskMem(new IntPtr(lpArray));
+            }
+
+            Marshal.FreeCoTaskMem(new IntPtr(lpEnvironmentVariables));
+            return distro;
         }
 
         /// <summary>
         /// Get details of WSL distributions reported as installed on the system by calling the WSL API.
         /// </summary>
         /// <returns>Returns the list of WSL distributions inquired for detailed information with the WSL API.</returns>
-        public unsafe static IEnumerable<DistroInfo> GetDistroQueryResult()
+        public static IEnumerable<DistroInfo> EnumerateDistroQueryResult()
         {
-            var results = new List<DistroInfo>();
-
-            foreach (var eachItem in GetDistroListFromRegistry())
-            {
-                var distro = new DistroInfo()
-                {
-                    DistroId = eachItem.DistroId,
-                    DistroName = eachItem.DistroName,
-                    BasePath = eachItem.BasePath,
-                };
-                distro.KernelCommandLine = eachItem.KernelCommandLine;
-                results.Add(distro);
-
-                distro.IsRegistered = NativeMethods.WslIsDistributionRegistered(eachItem.DistroName);
-
-                if (!distro.IsRegistered)
-                    continue;
-
-                var hr = NativeMethods.WslGetDistributionConfiguration(
-                    eachItem.DistroName,
-                    out int distroVersion,
-                    out int defaultUserId,
-                    out DistroFlags flags,
-                    out IntPtr environmentVariables,
-                    out int environmentVariableCount);
-
-                if (hr != 0)
-                    continue;
-
-                distro.WslVersion = distroVersion;
-                distro.DefaultUid = defaultUserId;
-                distro.DistroFlags = flags;
-
-                var lpEnvironmentVariables = (byte***)environmentVariables.ToPointer();
-
-                for (int i = 0; i < environmentVariableCount; i++)
-                {
-                    byte** lpArray = lpEnvironmentVariables[i];
-                    var content = Marshal.PtrToStringAnsi(new IntPtr(lpArray));
-                    distro.DefaultEnvironmentVariables.Add(content);
-                    Marshal.FreeCoTaskMem(new IntPtr(lpArray));
-                }
-
-                Marshal.FreeCoTaskMem(new IntPtr(lpEnvironmentVariables));
-            }
-
-            return results;
+            foreach (var eachItem in EnumerateDistroFromRegistry())
+                yield return QueryDistro(eachItem);
         }
 
         /// <summary>
