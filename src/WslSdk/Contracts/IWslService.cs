@@ -24,8 +24,6 @@ namespace WslSdk.Contracts
 
         void SetDefaultUid(string distroName, int defaultUid);
 
-        DistroFlags GetDistroFlags(string distroName);
-
         void SetDistroFlags(string distroName, DistroFlags distroFlags);
 
         void RegisterDistro(string newDistroName, string tarGzipFilePath);

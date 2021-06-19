@@ -66,11 +66,6 @@ namespace WslSdk
             throw new NotImplementedException();
         }
 
-        public DistroFlags GetDistroFlags(string distroName)
-        {
-            throw new NotImplementedException();
-        }
-
         public void SetDistroFlags(string distroName, DistroFlags distroFlags)
         {
             throw new NotImplementedException();

@@ -54,5 +54,28 @@ namespace WslSdk.Test
             Assert.IsNotNull(distroList);
             Assert.IsTrue(distroList.Length > 0);
         }
+
+        [TestMethod]
+        public void Test_QueryDistroInfo()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            dynamic queryResult = wslService.QueryDistroInfo(defaultDistroName);
+
+            Assert.IsNotNull(defaultDistroName);
+            Assert.AreNotEqual(queryResult.WslVersion(), 0);
+            Assert.AreEqual(queryResult.DefaultUid().GetType(), typeof(int));
+        }
+
+        [TestMethod]
+        public void Test_RunWslCommand()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            var res = wslService.RunWslCommand(defaultDistroName, "cat /etc/os-release");
+
+            Assert.IsNotNull(res);
+            Assert.IsTrue(res.Length > 0);
+        }
     }
 }
