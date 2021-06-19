@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using WslSdk.Contracts;
@@ -88,7 +89,12 @@ namespace WslSdk
 
         public string GetWslWindowsPath(string distroName)
         {
-            throw new NotImplementedException();
+            var targetDirectoryPath = Path.Combine("\\\\wsl$", distroName);
+
+            if (!Directory.Exists(targetDirectoryPath))
+                return null;
+
+            return targetDirectoryPath;
         }
 
         public string TranslateToWindowsPath(string distroName, string linuxPath)
