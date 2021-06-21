@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -221,22 +222,14 @@ namespace WslSdk
             if (!Directory.Exists(targetDirectoryPath))
                 Directory.CreateDirectory(targetDirectoryPath);
 
-            // To Do: targetDirectoryPath should be honored.
-            var currentDirectory = Environment.CurrentDirectory;
+            // To Do:
+            // It seems like WslRegsiterDistribution relies on QueryFullProcessImageName API to determine distro install location.
+            // To overcome the targetDirectoryPath ignoring issue, we need to create an additional stub executable file to handle registration process only.
 
-            try
-            {
-                Environment.CurrentDirectory = targetDirectoryPath;
+            var hr = NativeMethods.WslRegisterDistribution(distroName, tarGzipFilePath);
 
-                var hr = NativeMethods.WslRegisterDistribution(distroName, tarGzipFilePath);
-
-                if (hr != 0)
-                    throw new COMException($"Unexpected error occurred. ({hr:X8})", hr);
-            }
-            finally
-            {
-                Environment.CurrentDirectory = currentDirectory;
-            }
+            if (hr != 0)
+                throw new COMException($"Unexpected error occurred. ({hr:X8})", hr);
         }
 
         public static void UnregisterDistro(string distroName)
