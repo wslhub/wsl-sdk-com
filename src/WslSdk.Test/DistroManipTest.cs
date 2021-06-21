@@ -33,8 +33,9 @@ namespace WslSdk.Test
             dynamic wslService = ActivateWslService();
             var randomName = wslService.GenerateRandomName(true);
             var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
+            var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
 
-            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile);
+            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
             var res = wslService.RunWslCommand(randomName, "ls /");
             var unregisterResult = wslService.UnregisterDistro(randomName);
 
@@ -50,8 +51,9 @@ namespace WslSdk.Test
             dynamic wslService = ActivateWslService();
             var randomName = wslService.GenerateRandomName(true);
             var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
+            var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
 
-            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile);
+            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
             dynamic queryResult = wslService.QueryDistroInfo(randomName);
             var res = wslService.RunWslCommand(randomName, "ls /");
             var setDefaultUidResult = wslService.SetDefaultUid(randomName, queryResult.DefaultUid());
@@ -68,6 +70,25 @@ namespace WslSdk.Test
             Assert.IsNotNull(randomName);
             Assert.AreNotEqual(queryResult.WslVersion(), 0);
             Assert.AreEqual(queryResult.DefaultUid().GetType(), typeof(int));
+        }
+
+        [TestMethod]
+        public void Test_LinuxToWindowsPath()
+        {
+            dynamic wslService = ActivateWslService();
+            var randomName = wslService.GenerateRandomName(true);
+            var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
+            var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
+
+            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
+            var res = wslService.TranslateToWindowsPath(randomName, "/usr/bin");
+            var unregisterResult = wslService.UnregisterDistro(randomName);
+
+            Assert.IsNotNull(res);
+            Assert.IsTrue(res.Length > 0);
+            Assert.IsTrue(Directory.Exists(res));
+            Assert.IsTrue(registerResult);
+            Assert.IsTrue(unregisterResult);
         }
     }
 }

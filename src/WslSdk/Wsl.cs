@@ -195,7 +195,7 @@ namespace WslSdk
             return distro;
         }
 
-        public static bool SetDistroConfiguration(string distroName, int? defaultUid, DistroFlags? distroFlags)
+        public static void SetDistroConfiguration(string distroName, int? defaultUid, DistroFlags? distroFlags)
         {
             var currentConfig = QueryDistro(distroName);
             var newDefaultUid = currentConfig.DefaultUid;
@@ -207,20 +207,44 @@ namespace WslSdk
             if (distroFlags.HasValue)
                 newFlags = distroFlags.Value;
 
-            return NativeMethods.WslConfigureDistribution(distroName, newDefaultUid, newFlags) == 0;
+            var hr = NativeMethods.WslConfigureDistribution(distroName, newDefaultUid, newFlags);
+
+            if (hr != 0)
+                throw new COMException($"Unexpected error occurred. ({hr:X8})", hr);
         }
 
-        public static bool RegisterDistro(string distroName, string tarGzipFilePath)
+        public static void RegisterDistro(string distroName, string tarGzipFilePath, string targetDirectoryPath)
         {
             if (!File.Exists(tarGzipFilePath))
-                return false;
+                throw new ArgumentException("Selected tar.gz file does not exists.", nameof(tarGzipFilePath));
 
-            return NativeMethods.WslRegisterDistribution(distroName, tarGzipFilePath) == 0;
+            if (!Directory.Exists(targetDirectoryPath))
+                Directory.CreateDirectory(targetDirectoryPath);
+
+            // To Do: targetDirectoryPath should be honored.
+            var currentDirectory = Environment.CurrentDirectory;
+
+            try
+            {
+                Environment.CurrentDirectory = targetDirectoryPath;
+
+                var hr = NativeMethods.WslRegisterDistribution(distroName, tarGzipFilePath);
+
+                if (hr != 0)
+                    throw new COMException($"Unexpected error occurred. ({hr:X8})", hr);
+            }
+            finally
+            {
+                Environment.CurrentDirectory = currentDirectory;
+            }
         }
 
-        public static bool UnregisterDistro(string distroName)
+        public static void UnregisterDistro(string distroName)
         {
-            return NativeMethods.WslUnregisterDistribution(distroName) == 0;
+            var hr = NativeMethods.WslUnregisterDistribution(distroName);
+
+            if (hr != 0)
+                throw new COMException($"Unexpected error occurred. ({hr:X8})", hr);
         }
 
         /// <summary>

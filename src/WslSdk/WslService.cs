@@ -62,14 +62,14 @@ namespace WslSdk
             return Wsl.QueryDistro(distroName);
         }
 
-        public bool SetDefaultUid(string distroName, int defaultUid)
+        public void SetDefaultUid(string distroName, int defaultUid)
         {
-            return Wsl.SetDistroConfiguration(distroName, defaultUid, null);
+            Wsl.SetDistroConfiguration(distroName, defaultUid, null);
         }
 
-        public bool SetDistroFlags(string distroName, DistroFlags distroFlags)
+        public void SetDistroFlags(string distroName, DistroFlags distroFlags)
         {
-            return Wsl.SetDistroConfiguration(distroName, null, distroFlags);
+            Wsl.SetDistroConfiguration(distroName, null, distroFlags);
         }
 
         public string GenerateRandomName(bool addNumberPostfix)
@@ -77,14 +77,14 @@ namespace WslSdk
             return NamesGenerator.GetRandomName(addNumberPostfix ? 1 : 0);
         }
 
-        public bool RegisterDistro(string newDistroName, string tarGzipFilePath)
+        public void RegisterDistro(string newDistroName, string tarGzipFilePath, string targetDirectoryPath)
         {
-            return Wsl.RegisterDistro(newDistroName, tarGzipFilePath);
+            Wsl.RegisterDistro(newDistroName, tarGzipFilePath, targetDirectoryPath);
         }
 
-        public bool UnregisterDistro(string existingDistroName)
+        public void UnregisterDistro(string existingDistroName)
         {
-            return Wsl.UnregisterDistro(existingDistroName);
+            Wsl.UnregisterDistro(existingDistroName);
         }
 
         public string GetWslWindowsPath(string distroName)
@@ -99,14 +99,12 @@ namespace WslSdk
 
         public string TranslateToWindowsPath(string distroName, string linuxPath)
         {
-            // Implementation decision: use wslpath to maintain consistency
-            throw new NotImplementedException();
+            return Wsl.RunWslCommand(distroName, $"/usr/bin/wslpath -a -w {linuxPath}");
         }
 
         public string TranslateToLinuxPath(string distroName, string windowsPath)
         {
-            // Implementation decision: use wslpath to maintain consistency
-            throw new NotImplementedException();
+            return Wsl.RunWslCommand(distroName, $"/usr/bin/wslpath -a -u {windowsPath}");
         }
 
         public string CreateDriveMapping(string distroName, string desiredDriveLetter)
