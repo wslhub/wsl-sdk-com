@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using WslSdk.Models;
 
 namespace WslSdk.Interop
 {
@@ -50,67 +49,6 @@ namespace WslSdk.Interop
             SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetVersionExW(ref OSVERSIONINFOEXW osvi);
-
-        [SecurityCritical]
-        [DllImport("kernel32.dll",
-            CallingConvention = CallingConvention.Winapi,
-            SetLastError = true,
-            ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool CreatePipe(
-            out IntPtr hReadPipe,
-            out IntPtr hWritePipe,
-            ref SECURITY_ATTRIBUTES lpPipeAttributes,
-            [MarshalAs(UnmanagedType.U4)] int nSize);
-
-        [SecurityCritical]
-        [DllImport("kernel32.dll",
-            CallingConvention = CallingConvention.Winapi,
-            SetLastError = true,
-            ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool ReadFile(
-            IntPtr hFile,
-            IntPtr lpBuffer,
-            [MarshalAs(UnmanagedType.U4)] int nNumberOfBytesToRead,
-            [MarshalAs(UnmanagedType.U4)] out int lpNumberOfBytesRead,
-            IntPtr lpOverlapped);
-
-        [SecurityCritical]
-        [DllImport("kernel32.dll",
-            CallingConvention = CallingConvention.Winapi,
-            SetLastError = true,
-            ExactSpelling = true)]
-        public static extern IntPtr GetStdHandle(
-            [MarshalAs(UnmanagedType.U4)] int nStdHandle);
-
-        [SecurityCritical]
-        [DllImport("kernel32.dll",
-            CallingConvention = CallingConvention.Winapi,
-            SetLastError = true,
-            ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.U4)]
-        public static extern int WaitForSingleObject(
-            IntPtr hHandle,
-            [MarshalAs(UnmanagedType.U4)] int dwMilliseconds);
-
-        [SecurityCritical]
-        [DllImport("kernel32.dll",
-            CallingConvention = CallingConvention.Winapi,
-            SetLastError = true,
-            ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetExitCodeProcess(
-            IntPtr hProcess,
-            [MarshalAs(UnmanagedType.U4)] out int lpExitCode);
-
-        [SecurityCritical]
-        [DllImport("kernel32.dll",
-            CallingConvention = CallingConvention.Winapi,
-            SetLastError = true,
-            ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool CloseHandle(IntPtr hObject);
 
         /// <summary>
         /// The GetMessage function retrieves a message from the calling thread's 
@@ -299,107 +237,8 @@ namespace WslSdk.Interop
         [DllImport("ole32.dll")]
         public static extern int CoResumeClassObjects();
 
-        [SecurityCritical]
-        [DllImport("wslapi.dll",
-            CallingConvention = CallingConvention.Winapi,
-            CharSet = CharSet.Unicode,
-            ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool WslIsDistributionRegistered(
-            string distributionName);
-
-        [SecurityCritical]
-        [DllImport("wslapi.dll",
-            CallingConvention = CallingConvention.Winapi,
-            CharSet = CharSet.Unicode,
-            ExactSpelling = true,
-            PreserveSig = true)]
-        public static extern int WslGetDistributionConfiguration(
-            string distributionName,
-            [Out, MarshalAs(UnmanagedType.I4)] out int distributionVersion,
-            [Out, MarshalAs(UnmanagedType.I4)] out int defaultUID,
-            [Out, MarshalAs(UnmanagedType.I4)] out DistroFlags wslDistributionFlags,
-            out IntPtr defaultEnvironmentVariables,
-            [MarshalAs(UnmanagedType.I4)] out int defaultEnvironmentVariableCount);
-
-        [SecurityCritical]
-        [DllImport("wslapi.dll",
-            CallingConvention = CallingConvention.Winapi,
-            CharSet = CharSet.Unicode,
-            ExactSpelling = true,
-            PreserveSig = true)]
-        [return: MarshalAs(UnmanagedType.U4)]
-        public static extern int WslLaunch(
-            string distributionName,
-            string command,
-            [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory,
-            IntPtr stdIn,
-            IntPtr stdOut,
-            IntPtr stdErr,
-            out IntPtr process);
-
-        [SecurityCritical]
-        [DllImport("wslapi.dll",
-            CallingConvention = CallingConvention.Winapi,
-            CharSet = CharSet.Unicode,
-            ExactSpelling = true,
-            PreserveSig = true)]
-        [return: MarshalAs(UnmanagedType.U4)]
-        public static extern int WslLaunchInteractive(
-            string distributionName,
-            string command,
-            [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory,
-            [Out, MarshalAs(UnmanagedType.U4)] out int exitCode);
-
-        [SecurityCritical]
-        [DllImport("wslapi.dll",
-            CallingConvention = CallingConvention.Winapi,
-            CharSet = CharSet.Unicode,
-            ExactSpelling = true,
-            PreserveSig = true)]
-        [return: MarshalAs(UnmanagedType.U4)]
-        public static extern int WslConfigureDistribution(
-            string distributionName,
-            [MarshalAs(UnmanagedType.I4)] int defaultUID,
-            [MarshalAs(UnmanagedType.I4)] DistroFlags wslDistributionFlags);
-
-        [SecurityCritical]
-        [DllImport("wslapi.dll",
-            CallingConvention = CallingConvention.Winapi,
-            CharSet = CharSet.Unicode,
-            ExactSpelling = true,
-            PreserveSig = true)]
-        [return: MarshalAs(UnmanagedType.U4)]
-        public static extern int WslRegisterDistribution(
-            string distributionName,
-            string tarGzFilename);
-
-        [SecurityCritical]
-        [DllImport("wslapi.dll",
-            CallingConvention = CallingConvention.Winapi,
-            CharSet = CharSet.Unicode,
-            ExactSpelling = true,
-            PreserveSig = true)]
-        [return: MarshalAs(UnmanagedType.U4)]
-        public static extern int WslUnregisterDistribution(
-            string distributionName);
-
         public static readonly int
             E_INVALIDARG = unchecked((int)0x80070057);
-
-        public static readonly int
-            STD_INPUT_HANDLE = -10,
-            STD_OUTPUT_HANDLE = -11,
-            STD_ERROR_HANDLE = -12;
-
-        public static readonly int
-            INFINITE = unchecked((int)0xFFFFFFFF);
-
-        public static readonly int
-            WAIT_ABANDONED = 0x00000080,
-            WAIT_OBJECT_0 = 0x00000000,
-            WAIT_TIMEOUT = 0x00000102,
-            WAIT_FAILED = unchecked((int)0xFFFFFFFF);
 
         public const int WM_QUIT = 0x0012;
 
@@ -445,18 +284,6 @@ namespace WslSdk.Interop
             public ushort wSuiteMask;
             public byte wProductType;
             public byte wReserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SECURITY_ATTRIBUTES
-        {
-            [MarshalAs(UnmanagedType.U4)]
-            public int nLength;
-
-            public IntPtr lpSecurityDescriptor;
-
-            [MarshalAs(UnmanagedType.Bool)]
-            public bool bInheritHandle;
         }
 
         [StructLayout(LayoutKind.Sequential)]

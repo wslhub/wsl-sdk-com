@@ -73,18 +73,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="Models\DistroFlags.cs" />
     <Compile Include="Models\DistroInfo.cs" />
     <Compile Include="Models\DistroRegistryInfo.cs" />
     <Compile Include="NamesGenerator.cs" />
+    <Compile Include="WslDistroManipulation.cs" />
     <Compile Include="WslComServer.cs" />
     <Compile Include="Interop\HelperMethods.cs" />
     <Compile Include="Interop\IClassFactory.cs" />
     <Compile Include="Contracts\IWslService.cs" />
-    <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Wsl.cs" />
     <Compile Include="WslService.cs" />
     <Compile Include="WslServiceClassFactory.cs" />
   </ItemGroup>
@@ -100,6 +100,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <Import Project="..\WslSdk.Shared\WslSdk.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

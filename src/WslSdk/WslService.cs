@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using WslSdk.Contracts;
 using WslSdk.Interop;
 using WslSdk.Models;
+using WslSdk.Shared;
 
 namespace WslSdk
 {
@@ -29,47 +30,47 @@ namespace WslSdk
 
         public bool IsDistroRegistered(string distroName)
         {
-            return NativeMethods.WslIsDistributionRegistered(distroName);
+            return WslNativeMethods.Api.WslIsDistributionRegistered(distroName);
         }
 
         public DistroRegistryInfo GetDefaultDistro()
         {
-            return Wsl.GetDefaultDistroFromRegistry();
+            return WslDistroManipulation.GetDefaultDistroFromRegistry();
         }
 
         public string[] GetDistroList()
         {
-            return Wsl.EnumerateDistroFromRegistry().Select(x => x.DistroName).ToArray();
+            return WslDistroManipulation.EnumerateDistroFromRegistry().Select(x => x.DistroName).ToArray();
         }
 
         public string RunWslCommand(string distroName, string commandLine)
         {
-            return Wsl.RunWslCommand(distroName, commandLine);
+            return WslInteraction.RunWslCommand(distroName, commandLine);
         }
 
         public DistroRegistryInfo GetDistroInfo(string distroName)
         {
-            return Wsl.GetDistroFromRegistry(distroName);
+            return WslDistroManipulation.GetDistroFromRegistry(distroName);
         }
 
         public string GetDefaultDistroName()
         {
-            return Wsl.GetDefaultDistroFromRegistry()?.DistroName;
+            return WslDistroManipulation.GetDefaultDistroFromRegistry()?.DistroName;
         }
 
         public DistroInfo QueryDistroInfo(string distroName)
         {
-            return Wsl.QueryDistro(distroName);
+            return WslDistroManipulation.QueryDistro(distroName);
         }
 
         public void SetDefaultUid(string distroName, int defaultUid)
         {
-            Wsl.SetDistroConfiguration(distroName, defaultUid, null);
+            WslDistroManipulation.SetDistroConfiguration(distroName, defaultUid, null);
         }
 
         public void SetDistroFlags(string distroName, DistroFlags distroFlags)
         {
-            Wsl.SetDistroConfiguration(distroName, null, distroFlags);
+            WslDistroManipulation.SetDistroConfiguration(distroName, null, distroFlags);
         }
 
         public string GenerateRandomName(bool addNumberPostfix)
@@ -79,12 +80,12 @@ namespace WslSdk
 
         public void RegisterDistro(string newDistroName, string tarGzipFilePath, string targetDirectoryPath)
         {
-            Wsl.RegisterDistro(newDistroName, tarGzipFilePath, targetDirectoryPath);
+            WslDistroManipulation.RegisterDistro(newDistroName, tarGzipFilePath, targetDirectoryPath);
         }
 
         public void UnregisterDistro(string existingDistroName)
         {
-            Wsl.UnregisterDistro(existingDistroName);
+            WslDistroManipulation.UnregisterDistro(existingDistroName);
         }
 
         public string GetWslWindowsPath(string distroName)
@@ -99,12 +100,12 @@ namespace WslSdk
 
         public string TranslateToWindowsPath(string distroName, string linuxPath)
         {
-            return Wsl.RunWslCommand(distroName, $"/usr/bin/wslpath -a -w {linuxPath}");
+            return WslInteraction.RunWslCommand(distroName, $"/usr/bin/wslpath -a -w {linuxPath}");
         }
 
         public string TranslateToLinuxPath(string distroName, string windowsPath)
         {
-            return Wsl.RunWslCommand(distroName, $"/usr/bin/wslpath -a -u {windowsPath}");
+            return WslInteraction.RunWslCommand(distroName, $"/usr/bin/wslpath -a -u {windowsPath}");
         }
 
         public string CreateDriveMapping(string distroName, string desiredDriveLetter)
