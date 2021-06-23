@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using WslSdk.Shared;
 
@@ -14,9 +16,48 @@ namespace WslSdk.DistroLauncher
         internal const string ARG_RUN = "run";
         internal const string ARG_RUN_C = "-c";
 
+        internal static string SuggestedDistroName
+        {
+            get { return Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location); }
+        }
+
+        internal static bool CreateUser(string userName)
+        {
+            // Create the user account
+            string commandLine = $"/usr/sbin/adduser --quiet --gecos '' {userName}";
+            int hr = WslNativeMethods.Api.WslLaunchInteractive(SuggestedDistroName, commandLine, true, out int exitCode);
+
+            if (hr != 0 || exitCode != 0)
+                return false;
+
+            // Add the user account to any relevant groups.
+            commandLine = $"/usr/sbin/usermod -aG adm,cdrom,sudo,dip,plugdev {userName}";
+            hr = WslNativeMethods.Api.WslLaunchInteractive(SuggestedDistroName, commandLine, true, out exitCode);
+
+            if (hr != 0 || exitCode != 0)
+            {
+                commandLine = $"/user/sbin/deluser {userName}";
+                WslNativeMethods.Api.WslLaunchInteractive(SuggestedDistroName, commandLine, true, out exitCode);
+                return false;
+            }
+
+            return true;
+        }
+
+        internal static int QueryUid(string userName)
+        {
+            string command = $"/usr/bin/id -u {userName}";
+            string content = WslInteraction.RunWslCommand(SuggestedDistroName, command);
+
+            if (!int.TryParse(content, out int uid))
+                return (-1); // UID_INVALID
+
+            return uid;
+        }
+
         internal static int InstallDistribution(bool createUser)
         {
-            string distroName = DistributionInfo.SuggestedDistroName;
+            string distroName = SuggestedDistroName;
 
             // Register the distribution.
             Console.Out.WriteLine($"Installing WSL Distro {distroName}...");
@@ -25,21 +66,20 @@ namespace WslSdk.DistroLauncher
                 return hr;
 
             // Delete /etc/resolv.conf to allow WSL to generate a version based on Windows networking information.
-            int exitCode;
-            hr = WslNativeMethods.Api.WslLaunchInteractive(distroName, "/bin/rm /etc/resolv.conf", true, out exitCode);
+            hr = WslNativeMethods.Api.WslLaunchInteractive(distroName, "/bin/rm /etc/resolv.conf", true, out int exitCode);
             if (hr != 0)
                 return hr;
 
             // Create a user account.
             if (createUser)
             {
-                string newUserName = null;
+                string newUserName;
                 do
                 {
                     Console.Out.Write("Type a user name to create: ");
                     newUserName = Console.In.ReadLine();
                 }
-                while (!DistributionInfo.CreateUser(newUserName));
+                while (!CreateUser(newUserName));
 
                 // Set this user account as the default.
                 hr = SetDefaultUser(newUserName);
@@ -52,12 +92,12 @@ namespace WslSdk.DistroLauncher
 
         internal static int SetDefaultUser(string userName)
         {
-            int uid = DistributionInfo.QueryUid(userName);
+            int uid = QueryUid(userName);
             if (uid == (-1)) // UID_INVALID
                 return unchecked((int)0x80070057); // E_INVALIDARG
 
             int hr = WslNativeMethods.Api.WslConfigureDistribution(
-                DistributionInfo.SuggestedDistroName,
+                SuggestedDistroName,
                 uid,
                 /* (WSL_DISTRIBUTION_FLAGS_ENABLE_INTEROP | WSL_DISTRIBUTION_FLAGS_APPEND_NT_PATH | WSL_DISTRIBUTION_FLAGS_ENABLE_DRIVE_MOUNTING) */ 0x7);
 
@@ -73,7 +113,26 @@ namespace WslSdk.DistroLauncher
         [STAThread]
         private static void Main(string[] args)
         {
-            string distroName = DistributionInfo.SuggestedDistroName;
+            // Run CoInitializeSecurity first
+            int hr = ComNativeMethods.CoInitializeSecurity(
+                IntPtr.Zero,
+                (-1),
+                IntPtr.Zero,
+                IntPtr.Zero,
+                ComNativeMethods.RpcAuthnLevel.Default,
+                ComNativeMethods.RpcImpLevel.Impersonate,
+                IntPtr.Zero,
+                ComNativeMethods.EoAuthnCap.StaticCloaking,
+                IntPtr.Zero);
+
+            if (hr != 0)
+            {
+                Console.Error.WriteLine($"Cannot complete CoInitializeSecurity. {hr:X8}");
+                Environment.Exit(1);
+                return;
+            }
+
+            string distroName = SuggestedDistroName;
 
             // Update the title bar of the console window.
             Console.Title = $"WSL Distro {distroName}";
@@ -95,7 +154,6 @@ namespace WslSdk.DistroLauncher
 
             // Install the distribution if it is not already.
             bool installOnly = (arguments.Count > 0 && string.Equals(arguments[0], ARG_INSTALL, StringComparison.Ordinal));
-            int hr = 0; // S_OK
             if (!WslNativeMethods.Api.WslIsDistributionRegistered(distroName))
             {
                 // If the '--root' option is specified, do not create a user account.

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using WslSdk.Interop;
+using WslSdk.Shared;
 
 namespace WslSdk
 {
@@ -11,15 +11,15 @@ namespace WslSdk
         /// </summary>
         private static void Main(string[] args)
         {
-            var result = NativeMethods.CoInitializeSecurity(
+            var result = ComNativeMethods.CoInitializeSecurity(
                 IntPtr.Zero,
                 (-1),
                 IntPtr.Zero,
                 IntPtr.Zero,
-                NativeMethods.RpcAuthnLevel.Default,
-                NativeMethods.RpcImpLevel.Impersonate,
+                ComNativeMethods.RpcAuthnLevel.Default,
+                ComNativeMethods.RpcImpLevel.Impersonate,
                 IntPtr.Zero,
-                NativeMethods.EoAuthnCap.StaticCloaking,
+                ComNativeMethods.EoAuthnCap.StaticCloaking,
                 IntPtr.Zero);
 
             if (result != 0)
