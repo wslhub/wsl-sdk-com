@@ -7,7 +7,7 @@
     <ProjectGuid>{B578DF14-35A4-4C7D-BBF8-9E86782F50C2}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>WslSdk.DistroLauncher</RootNamespace>
-    <AssemblyName>WslSdk.DistroLauncher</AssemblyName>
+    <AssemblyName>distrorun</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -52,4 +52,7 @@
   </ItemGroup>
   <Import Project="..\WslSdk.Shared\WslSdk.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /y "$(TargetPath)" "$(SolutionDir)WslSdk\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

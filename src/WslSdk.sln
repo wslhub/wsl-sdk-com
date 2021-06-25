@@ -4,8 +4,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31410.414
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WslSdk", "WslSdk\WslSdk.csproj", "{D7F307D4-173B-4440-AB23-71795BF66CFA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B578DF14-35A4-4C7D-BBF8-9E86782F50C2} = {B578DF14-35A4-4C7D-BBF8-9E86782F50C2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WslSdk.Test", "WslSdk.Test\WslSdk.Test.csproj", "{F5EA3F3A-3379-47F5-AA5A-03F0BA61A7B3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B578DF14-35A4-4C7D-BBF8-9E86782F50C2} = {B578DF14-35A4-4C7D-BBF8-9E86782F50C2}
+		{D7F307D4-173B-4440-AB23-71795BF66CFA} = {D7F307D4-173B-4440-AB23-71795BF66CFA}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WslSdk.DistroLauncher", "WslSdk.DistroLauncher\WslSdk.DistroLauncher.csproj", "{B578DF14-35A4-4C7D-BBF8-9E86782F50C2}"
 EndProject
