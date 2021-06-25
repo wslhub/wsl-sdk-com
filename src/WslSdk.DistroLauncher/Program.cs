@@ -21,33 +21,53 @@ namespace WslSdk.DistroLauncher
             get { return Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location); }
         }
 
-        internal static bool CreateUser(string userName)
+        internal static string DistroBasePath
+        {
+            get { return Path.Combine($@"\\wsl$\{SuggestedDistroName}\");  }
+        }
+
+        internal static bool HasUserManipulationTool
+        {
+            get
+            {
+                return File.Exists(Path.Combine(DistroBasePath, @"usr\sbin\adduser")) &&
+                    File.Exists(Path.Combine(DistroBasePath, @"usr\sbin\usermod")) &&
+                    File.Exists(Path.Combine(DistroBasePath, @"usr\sbin\deluser"));
+            }
+        }
+
+        internal static bool HasFileRemovalTool
+        {
+            get { return File.Exists(Path.Combine(DistroBasePath, @"bin\rm")); }
+        }
+
+        internal static bool CreateUser(string distroName, string userName)
         {
             // Create the user account
             string commandLine = $"/usr/sbin/adduser --quiet --gecos '' {userName}";
-            int hr = WslNativeMethods.Api.WslLaunchInteractive(SuggestedDistroName, commandLine, true, out int exitCode);
+            int hr = WslNativeMethods.Api.WslLaunchInteractive(distroName, commandLine, true, out int exitCode);
 
             if (hr != 0 || exitCode != 0)
                 return false;
 
             // Add the user account to any relevant groups.
             commandLine = $"/usr/sbin/usermod -aG adm,cdrom,sudo,dip,plugdev {userName}";
-            hr = WslNativeMethods.Api.WslLaunchInteractive(SuggestedDistroName, commandLine, true, out exitCode);
+            hr = WslNativeMethods.Api.WslLaunchInteractive(distroName, commandLine, true, out exitCode);
 
             if (hr != 0 || exitCode != 0)
             {
                 commandLine = $"/user/sbin/deluser {userName}";
-                WslNativeMethods.Api.WslLaunchInteractive(SuggestedDistroName, commandLine, true, out exitCode);
+                WslNativeMethods.Api.WslLaunchInteractive(distroName, commandLine, true, out exitCode);
                 return false;
             }
 
             return true;
         }
 
-        internal static int QueryUid(string userName)
+        internal static int QueryUid(string distroName, string userName)
         {
             string command = $"/usr/bin/id -u {userName}";
-            string content = WslInteraction.RunWslCommand(SuggestedDistroName, command);
+            string content = WslInteraction.RunWslCommand(distroName, command);
 
             if (!int.TryParse(content, out int uid))
                 return (-1); // UID_INVALID
@@ -55,10 +75,8 @@ namespace WslSdk.DistroLauncher
             return uid;
         }
 
-        internal static int InstallDistribution(bool createUser)
+        internal static int InstallDistribution(string distroName, bool createUser)
         {
-            string distroName = SuggestedDistroName;
-
             // Register the distribution.
             Console.Out.WriteLine($"Installing WSL Distro {distroName}...");
             int hr = WslNativeMethods.Api.WslRegisterDistribution(distroName, "install.tar.gz");
@@ -66,12 +84,21 @@ namespace WslSdk.DistroLauncher
                 return hr;
 
             // Delete /etc/resolv.conf to allow WSL to generate a version based on Windows networking information.
-            hr = WslNativeMethods.Api.WslLaunchInteractive(distroName, "/bin/rm /etc/resolv.conf", true, out int exitCode);
-            if (hr != 0)
-                return hr;
+            if (HasFileRemovalTool)
+            {
+                hr = WslNativeMethods.Api.WslLaunchInteractive(distroName, "/bin/rm /etc/resolv.conf", true, out int exitCode);
+                if (hr != 0)
+                    return hr;
+            }
+            else
+            {
+                hr = WslNativeMethods.Api.WslLaunchInteractive(distroName, "rm /etc/resolv.conf", true, out int exitCode);
+                if (hr != 0)
+                    return hr;
+            }
 
             // Create a user account.
-            if (createUser)
+            if (createUser && HasUserManipulationTool)
             {
                 string newUserName;
                 do
@@ -79,10 +106,10 @@ namespace WslSdk.DistroLauncher
                     Console.Out.Write("Type a user name to create: ");
                     newUserName = Console.In.ReadLine();
                 }
-                while (!CreateUser(newUserName));
+                while (!CreateUser(distroName, newUserName));
 
                 // Set this user account as the default.
-                hr = SetDefaultUser(newUserName);
+                hr = SetDefaultUser(distroName, newUserName);
                 if (hr != 0)
                     return hr;
             }
@@ -90,14 +117,14 @@ namespace WslSdk.DistroLauncher
             return hr;
         }
 
-        internal static int SetDefaultUser(string userName)
+        internal static int SetDefaultUser(string distroName, string userName)
         {
-            int uid = QueryUid(userName);
+            int uid = QueryUid(distroName, userName);
             if (uid == (-1)) // UID_INVALID
                 return unchecked((int)0x80070057); // E_INVALIDARG
 
             int hr = WslNativeMethods.Api.WslConfigureDistribution(
-                SuggestedDistroName,
+                distroName,
                 uid,
                 /* (WSL_DISTRIBUTION_FLAGS_ENABLE_INTEROP | WSL_DISTRIBUTION_FLAGS_APPEND_NT_PATH | WSL_DISTRIBUTION_FLAGS_ENABLE_DRIVE_MOUNTING) */ 0x7);
 
@@ -158,7 +185,7 @@ namespace WslSdk.DistroLauncher
             {
                 // If the '--root' option is specified, do not create a user account.
                 bool useRoot = (installOnly && arguments.Count > 1 && string.Equals(arguments[1], ARG_INSTALL_ROOT, StringComparison.Ordinal));
-                hr = InstallDistribution(!useRoot);
+                hr = InstallDistribution(distroName, !useRoot);
                 if (hr != 0)
                 {
                     if (hr == HRESULT_FROM_WIN32(183)/* ERROR_ALREADY_EXISTS */)
@@ -205,7 +232,7 @@ namespace WslSdk.DistroLauncher
                     if (arguments.Count == 3)
                     {
                         if (string.Equals(arguments[1], ARG_CONFIG_DEFAULT_USER, StringComparison.Ordinal))
-                            hr = SetDefaultUser(arguments[2]);
+                            hr = SetDefaultUser(distroName, arguments[2]);
                     }
 
                     if (hr == 0)
