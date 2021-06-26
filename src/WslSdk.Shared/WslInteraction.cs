@@ -14,11 +14,14 @@ namespace WslSdk.Shared
         /// </summary>
         /// <param name="distroName">The name of the WSL distribution on which to run the command.</param>
         /// <param name="commandLine">The command you want to run.</param>
-        /// <param name="outputStream">The System.IO.Stream object to receive the results. It must be writable.</param>
+        /// <param name="dataReceivedCallback">The callback receiving data segment from the child process.</param>
         /// <param name="bufferLength">Specifies the size of the buffer array to use when copying from anonymous pipes to the underlying stream. You do not need to specify a value.</param>
         /// <returns>Returns the sum of the number of bytes received.</returns>
-        public static unsafe long RunWslCommand(string distroName, string commandLine, Stream outputStream, int bufferLength = 65536)
+        public static unsafe long RunWslCommand(string distroName, string commandLine, Action<ArraySegment<byte>> dataReceivedCallback, int bufferLength = 65536)
         {
+            if (dataReceivedCallback == null)
+                throw new ArgumentNullException(nameof(dataReceivedCallback));
+
             var isRegistered = WslNativeMethods.Api.WslIsDistributionRegistered(distroName);
 
             if (!isRegistered)
@@ -36,6 +39,10 @@ namespace WslSdk.Shared
 
             if (!Win32NativeMethods.CreatePipe(out IntPtr readPipe, out IntPtr writePipe, ref attributes, 0))
                 throw new Exception("Cannot create pipe for I/O.");
+
+            bufferLength = Math.Max(bufferLength, 1024);
+            var bufferPointer = Marshal.AllocHGlobal(bufferLength);
+            var pBufferPointer = (byte*)bufferPointer.ToPointer();
 
             try
             {
@@ -60,22 +67,17 @@ namespace WslSdk.Shared
                 }
 
                 Win32NativeMethods.CloseHandle(child);
-                bufferLength = Math.Min(bufferLength, 1024);
-
-                var bufferPointer = Marshal.AllocHGlobal(bufferLength);
-                var pBufferPointer = (byte*)bufferPointer.ToPointer();
-
                 var buffer = new byte[bufferLength];
-
                 var length = 0L;
                 var read = 0;
 
                 while (true)
                 {
-                    if (!Win32NativeMethods.ReadFile(readPipe, bufferPointer, bufferLength, out read, IntPtr.Zero))
+                    Win32NativeMethods.RtlZeroMemory(bufferPointer, bufferLength);
+
+                    if (!Win32NativeMethods.ReadFile(readPipe, bufferPointer, bufferLength - 1, out read, IntPtr.Zero))
                     {
                         var lastError = Marshal.GetLastWin32Error();
-                        Marshal.FreeHGlobal(bufferPointer);
 
                         if (lastError != 0)
                             throw new Win32Exception(lastError, "Cannot read data from pipe.");
@@ -88,19 +90,17 @@ namespace WslSdk.Shared
                         Buffer.MemoryCopy(pBufferPointer, pBuffer, read, read);
                         length += read;
                     }
-                    outputStream.Write(buffer, 0, read);
+                    dataReceivedCallback.Invoke(new ArraySegment<byte>(buffer, 0, read));
 
-                    if (read < bufferLength)
-                    {
-                        Marshal.FreeHGlobal(bufferPointer);
+                    if (read < bufferLength - 1)
                         break;
-                    }
                 }
 
                 return length;
             }
             finally
             {
+                Marshal.FreeHGlobal(bufferPointer);
                 Win32NativeMethods.CloseHandle(readPipe);
                 Win32NativeMethods.CloseHandle(writePipe);
             }
@@ -116,70 +116,14 @@ namespace WslSdk.Shared
         /// <param name="commandLine">The command you want to run.</param>
         /// <param name="bufferLength">Specifies the size of the buffer array to use when copying from anonymous pipes to the underlying stream. You do not need to specify a value.</param>
         /// <returns>Returns the collected output string.</returns>
-        public static unsafe string RunWslCommand(string distroName, string commandLine, int bufferLength = 65536)
+        public static string RunWslCommand(string distroName, string commandLine, int bufferLength = 65536)
         {
-            var isRegistered = WslNativeMethods.Api.WslIsDistributionRegistered(distroName);
-
-            if (!isRegistered)
-                throw new Exception($"{distroName} is not registered distro.");
-
-            var stdin = Win32NativeMethods.GetStdHandle(Win32NativeMethods.STD_INPUT_HANDLE);
-            var stderr = Win32NativeMethods.GetStdHandle(Win32NativeMethods.STD_ERROR_HANDLE);
-
-            var attributes = new Win32NativeMethods.SECURITY_ATTRIBUTES
-            {
-                lpSecurityDescriptor = IntPtr.Zero,
-                bInheritHandle = true,
-            };
-            attributes.nLength = Marshal.SizeOf(attributes);
-
-            if (!Win32NativeMethods.CreatePipe(out IntPtr readPipe, out IntPtr writePipe, ref attributes, 0))
-                throw new Exception("Cannot create pipe for I/O.");
-
-            try
-            {
-                var hr = WslNativeMethods.Api.WslLaunch(distroName, commandLine, false, stdin, writePipe, stderr, out IntPtr child);
-
-                if (hr < 0)
-                    throw new COMException("Cannot launch WSL process", hr);
-
-                bufferLength = Math.Min(bufferLength, 1024);
-                var bufferPointer = Marshal.AllocHGlobal(bufferLength);
-                var outputContents = new StringBuilder();
-                var encoding = new UTF8Encoding(false);
-                var read = 0;
-
-                while (true)
-                {
-                    Win32NativeMethods.RtlZeroMemory(bufferPointer, bufferLength);
-
-                    if (!Win32NativeMethods.ReadFile(readPipe, bufferPointer, bufferLength - 1, out read, IntPtr.Zero))
-                    {
-                        var lastError = Marshal.GetLastWin32Error();
-                        Marshal.FreeHGlobal(bufferPointer);
-
-                        if (lastError != 0)
-                            throw new Win32Exception(lastError, "Cannot read data from pipe.");
-
-                        break;
-                    }
-
-                    outputContents.Append(encoding.GetString((byte*)bufferPointer.ToPointer(), read));
-
-                    if (read < bufferLength - 1)
-                    {
-                        Marshal.FreeHGlobal(bufferPointer);
-                        break;
-                    }
-                }
-
-                return outputContents.ToString();
-            }
-            finally
-            {
-                Win32NativeMethods.CloseHandle(readPipe);
-                Win32NativeMethods.CloseHandle(writePipe);
-            }
+            var content = new StringBuilder();
+            var utf8Encoding = new UTF8Encoding(false);
+            RunWslCommand(distroName, commandLine,
+                x => content.Append(utf8Encoding.GetString(x.Array, x.Offset, x.Count)),
+                bufferLength);
+            return content.ToString();
         }
 
         public static string FindExistingPath(string distroName, params string[] unixPathCandidates)
