@@ -137,5 +137,24 @@ namespace WslSdk.Test
 
             wslService.UnregisterDistro(randomName);
         }
+
+        [TestMethod]
+        public void Test_PathExistence()
+        {
+            dynamic wslService = ActivateWslService();
+            var randomName = wslService.GenerateRandomName(true);
+            var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
+            var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
+
+            wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
+            
+            var res = wslService.TestLinuxPath(randomName, "/bin");
+            Assert.IsTrue(res);
+
+            res = wslService.TestLinuxPath(randomName, "/aaa");
+            Assert.IsFalse(res);
+
+            wslService.UnregisterDistro(randomName);
+        }
     }
 }

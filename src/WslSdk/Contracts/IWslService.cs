@@ -38,8 +38,6 @@ namespace WslSdk.Contracts
 
         string TranslateToLinuxPath(string distroName, string windowsAbsolutePath);
 
-        string CreateDriveMapping(string distroName, string desiredDriveLetter);
-
-        string CreateSymbolicLink(string distroName, string desiredPath, string symbolicLinkName);
+        bool TestLinuxPath(string distroName, string linuxAbsolutePath);
     }
 }

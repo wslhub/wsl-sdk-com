@@ -130,14 +130,26 @@ namespace WslSdk
                 StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
         }
 
-        public string CreateDriveMapping(string distroName, string desiredDriveLetter)
+        public bool TestLinuxPath(string distroName, string linuxAbsolutePath)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                var wslpathBinPath = WslInteraction.FindExistingPath(
+                    distroName,
+                    "/bin/wslpath", "/usr/bin/wslpath");
 
-        public string CreateSymbolicLink(string distroName, string desiredPath, string symbolicLinkName)
-        {
-            throw new NotImplementedException();
+                var response = WslInteraction.RunWslCommand(distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}");
+
+                if (response == null)
+                    throw new Exception("Cannot run wslpath executable.");
+
+                var firstLine = response.Split(
+                    new char[] { '\n' },
+                    StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+
+                return Directory.Exists(firstLine) || File.Exists(firstLine);
+            }
+            catch { return false; }
         }
 
         // These routines perform the additional COM registration needed by 
