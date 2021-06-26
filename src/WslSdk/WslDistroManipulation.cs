@@ -221,7 +221,7 @@ namespace WslSdk
             var distrorunPath = Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                 "distrorun.exe");
-            Console.Out.WriteLine(distrorunPath);
+
             if (!File.Exists(distrorunPath))
                 throw new FileNotFoundException("distrorun.exe required to run the distro registration.", distrorunPath);
 
@@ -231,9 +231,8 @@ namespace WslSdk
             if (!Directory.Exists(targetDirectoryPath))
                 Directory.CreateDirectory(targetDirectoryPath);
 
-            var basePath = Path.GetDirectoryName(targetDirectoryPath);
-            var newLauncherPath = Path.Combine(basePath, distroName.TrimEnd('.') + ".exe");
-            var newRootfsPath = Path.Combine(basePath, "install.tar.gz");
+            var newLauncherPath = Path.Combine(targetDirectoryPath, distroName.TrimEnd('.') + ".exe");
+            var newRootfsPath = Path.Combine(targetDirectoryPath, "install.tar.gz");
 
             File.Copy(distrorunPath, newLauncherPath, true);
             File.Copy(tarGzipFilePath, newRootfsPath, true);
@@ -256,7 +255,7 @@ namespace WslSdk
             process.WaitForExit();
 
             if (process.ExitCode != 0)
-                throw new Exception($"Process exit code is non-zero: {process.ExitCode} - {process.StandardOutput.ReadToEnd()}");
+                throw new Exception($"Process exit code is non-zero: {process.ExitCode} - {process.StandardError.ReadToEnd()}");
         }
 
         public static void UnregisterDistro(string distroName)
