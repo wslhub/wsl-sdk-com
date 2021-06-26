@@ -44,29 +44,33 @@ namespace WslSdk.Shared
             var bufferPointer = Marshal.AllocHGlobal(bufferLength);
             var pBufferPointer = (byte*)bufferPointer.ToPointer();
 
+            var hr = WslNativeMethods.Api.WslLaunch(distroName, commandLine, false, stdin, writePipe, stderr, out IntPtr child);
+
             try
             {
-                var hr = WslNativeMethods.Api.WslLaunch(distroName, commandLine, false, stdin, writePipe, stderr, out IntPtr child);
-
                 if (hr < 0)
                     throw new COMException("Cannot launch WSL process", hr);
 
-                Win32NativeMethods.WaitForSingleObject(child, Win32NativeMethods.INFINITE);
+                for (int i = 0; i < 10; i++)
+                {
+                    var waitResult = Win32NativeMethods.WaitForSingleObject(child, 1000);
+
+                    if (waitResult != Win32NativeMethods.WAIT_TIMEOUT)
+                        break;
+                }
 
                 if (!Win32NativeMethods.GetExitCodeProcess(child, out int exitCode))
                 {
                     var lastError = Marshal.GetLastWin32Error();
-                    Win32NativeMethods.CloseHandle(child);
                     throw new Win32Exception(lastError, "Cannot query exit code of the process.");
                 }
 
-                if (exitCode != 0)
-                {
-                    Win32NativeMethods.CloseHandle(child);
-                    throw new Exception($"Process exit code is non-zero: {exitCode}");
-                }
+                if (exitCode == 259) // STILL_ACTIVE
+                    throw new TimeoutException($"Process still running.");
 
-                Win32NativeMethods.CloseHandle(child);
+                if (exitCode != 0)
+                    throw new Exception($"Process exit code is non-zero: {exitCode}");
+
                 var buffer = new byte[bufferLength];
                 var length = 0L;
                 var read = 0;
@@ -101,6 +105,7 @@ namespace WslSdk.Shared
             finally
             {
                 Marshal.FreeHGlobal(bufferPointer);
+                Win32NativeMethods.CloseHandle(child);
                 Win32NativeMethods.CloseHandle(readPipe);
                 Win32NativeMethods.CloseHandle(writePipe);
             }
