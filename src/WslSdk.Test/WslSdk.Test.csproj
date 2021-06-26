@@ -52,7 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DistroEnumTest.cs" />
+    <Compile Include="DistroFileSystemTest.cs" />
     <Compile Include="DistroManipTest.cs" />
+    <Compile Include="DistroScenarioTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
