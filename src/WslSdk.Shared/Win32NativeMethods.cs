@@ -32,7 +32,7 @@ namespace WslSdk.Shared
         public static extern bool CreatePipe(
             out IntPtr hReadPipe,
             out IntPtr hWritePipe,
-            ref SECURITY_ATTRIBUTES lpPipeAttributes,
+            SECURITY_ATTRIBUTES lpPipeAttributes,
             [MarshalAs(UnmanagedType.U4)] int nSize);
 
         [SecurityCritical]
@@ -150,7 +150,7 @@ namespace WslSdk.Shared
             SW_FORCEMINIMIZE = 11;
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SECURITY_ATTRIBUTES
+        public class SECURITY_ATTRIBUTES
         {
             [MarshalAs(UnmanagedType.U4)]
             public int nLength;

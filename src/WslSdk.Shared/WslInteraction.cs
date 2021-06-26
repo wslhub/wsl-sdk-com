@@ -45,7 +45,7 @@ namespace WslSdk.Shared
 
             try
             {
-                if (!Win32NativeMethods.CreatePipe(out readPipe, out writePipe, ref attributes, 0))
+                if (!Win32NativeMethods.CreatePipe(out readPipe, out writePipe, attributes, 0))
                     throw new Exception("Cannot create pipe for I/O.");
 
                 bufferLength = Math.Max(bufferLength, 1024);
