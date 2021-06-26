@@ -34,9 +34,9 @@ namespace WslSdk.Contracts
 
         string GetWslWindowsPath(string distroName);
 
-        string TranslateToWindowsPath(string distroName, string linuxPath);
+        string TranslateToWindowsPath(string distroName, string linuxAbsolutePath);
 
-        string TranslateToLinuxPath(string distroName, string windowsPath);
+        string TranslateToLinuxPath(string distroName, string windowsAbsolutePath);
 
         string CreateDriveMapping(string distroName, string desiredDriveLetter);
 
