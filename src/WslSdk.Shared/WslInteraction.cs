@@ -143,23 +143,6 @@ namespace WslSdk.Shared
                 if (hr < 0)
                     throw new COMException("Cannot launch WSL process", hr);
 
-                Win32NativeMethods.WaitForSingleObject(child, Win32NativeMethods.INFINITE);
-
-                if (!Win32NativeMethods.GetExitCodeProcess(child, out int exitCode))
-                {
-                    var lastError = Marshal.GetLastWin32Error();
-                    Win32NativeMethods.CloseHandle(child);
-                    throw new Win32Exception(lastError, "Cannot query exit code of the process.");
-                }
-
-                if (exitCode != 0)
-                {
-                    Win32NativeMethods.CloseHandle(child);
-                    throw new Exception($"Process exit code is non-zero: {exitCode}");
-                }
-
-                Win32NativeMethods.CloseHandle(child);
-
                 bufferLength = Math.Min(bufferLength, 1024);
                 var bufferPointer = Marshal.AllocHGlobal(bufferLength);
                 var outputContents = new StringBuilder();
@@ -168,7 +151,9 @@ namespace WslSdk.Shared
 
                 while (true)
                 {
-                    if (!Win32NativeMethods.ReadFile(readPipe, bufferPointer, bufferLength, out read, IntPtr.Zero))
+                    Win32NativeMethods.RtlZeroMemory(bufferPointer, bufferLength);
+
+                    if (!Win32NativeMethods.ReadFile(readPipe, bufferPointer, bufferLength - 1, out read, IntPtr.Zero))
                     {
                         var lastError = Marshal.GetLastWin32Error();
                         Marshal.FreeHGlobal(bufferPointer);
@@ -181,7 +166,7 @@ namespace WslSdk.Shared
 
                     outputContents.Append(encoding.GetString((byte*)bufferPointer.ToPointer(), read));
 
-                    if (read < bufferLength)
+                    if (read < bufferLength - 1)
                     {
                         Marshal.FreeHGlobal(bufferPointer);
                         break;

@@ -33,6 +33,7 @@ namespace WslSdk.Test
 
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Length > 0);
+            Assert.IsTrue(res.Contains("</html>"));
         }
     }
 }

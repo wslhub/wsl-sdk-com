@@ -19,12 +19,44 @@ namespace WslSdk.Shared
             CallingConvention = CallingConvention.Winapi,
             SetLastError = true,
             ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern int GetProcessId(
+            IntPtr Process);
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
+            SetLastError = true,
+            ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CreatePipe(
             out IntPtr hReadPipe,
             out IntPtr hWritePipe,
             ref SECURITY_ATTRIBUTES lpPipeAttributes,
             [MarshalAs(UnmanagedType.U4)] int nSize);
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
+            SetLastError = true,
+            ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool PeekNamedPipe(
+            IntPtr hNamedPipe,
+            IntPtr lpBuffer,
+            [MarshalAs(UnmanagedType.U4)] int nBufferSize,
+            [Out, MarshalAs(UnmanagedType.U4)] out int lpBytesRead,
+            [Out, MarshalAs(UnmanagedType.U4)] out int lpTotalBytesAvail,
+            [Out, MarshalAs(UnmanagedType.U4)] out int lpBytesLeftThisMessage);
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
+            SetLastError = false,
+            ExactSpelling = true)]
+        public static extern void RtlZeroMemory(
+            IntPtr Destination,
+            [MarshalAs(UnmanagedType.U4)] int Length);
 
         [SecurityCritical]
         [DllImport("kernel32.dll",
@@ -48,6 +80,17 @@ namespace WslSdk.Shared
         public static extern int WaitForSingleObject(
             IntPtr hHandle,
             [MarshalAs(UnmanagedType.U4)] int dwMilliseconds);
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
+            SetLastError = true,
+            ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern int WaitForSingleObjectEx(
+            IntPtr hHandle,
+            [MarshalAs(UnmanagedType.U4)] int dwMilliseconds,
+            [MarshalAs(UnmanagedType.Bool)] bool bAlertable);
 
         [SecurityCritical]
         [DllImport("kernel32.dll",
