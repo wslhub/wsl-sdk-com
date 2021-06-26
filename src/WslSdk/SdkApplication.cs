@@ -5,9 +5,9 @@ using WslSdk.Interop;
 
 namespace WslSdk
 {
-    internal sealed class WslComServer
+    internal sealed class SdkApplication
     {
-        private WslComServer()
+        private SdkApplication()
         {
             _exitMenuItem = new ToolStripMenuItem("E&xit")
             {
@@ -29,9 +29,9 @@ namespace WslSdk
             };
         }
 
-        private static WslComServer _instance = new WslComServer();
+        private static SdkApplication _instance = new SdkApplication();
 
-        public static WslComServer Instance
+        public static SdkApplication Instance
         {
             get { return _instance; }
         }

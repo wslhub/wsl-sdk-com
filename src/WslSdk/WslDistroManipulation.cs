@@ -243,6 +243,7 @@ namespace WslSdk
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
+                WindowStyle = ProcessWindowStyle.Hidden,
             };
 
             var process = new Process()

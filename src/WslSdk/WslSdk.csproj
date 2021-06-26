@@ -92,7 +92,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="WslDistroManipulation.cs" />
-    <Compile Include="WslComServer.cs" />
+    <Compile Include="SdkApplication.cs" />
     <Compile Include="Interop\HelperMethods.cs" />
     <Compile Include="Interop\IClassFactory.cs" />
     <Compile Include="Contracts\IWslService.cs" />

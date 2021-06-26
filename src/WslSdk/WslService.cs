@@ -19,13 +19,13 @@ namespace WslSdk
         public WslService()
         {
             // Increment the lock count of objects in the COM server.
-            WslComServer.Instance.Lock();
+            SdkApplication.Instance.Lock();
         }
 
         ~WslService()
         {
             // Decrement the lock count of objects in the COM server.
-            WslComServer.Instance.Unlock();
+            SdkApplication.Instance.Unlock();
         }
 
         public bool IsDistroRegistered(string distroName)
