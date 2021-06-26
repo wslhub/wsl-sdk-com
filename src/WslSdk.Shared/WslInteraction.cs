@@ -39,20 +39,20 @@ namespace WslSdk.Shared
 
             IntPtr
                 bufferPointer = IntPtr.Zero,
-                readPipe = IntPtr.Zero,
-                writePipe = IntPtr.Zero,
+                childStdoutReadPipe = IntPtr.Zero,
+                childStdoutWritePipe = IntPtr.Zero,
                 child = IntPtr.Zero;
 
             try
             {
-                if (!Win32NativeMethods.CreatePipe(out readPipe, out writePipe, attributes, 0))
+                if (!Win32NativeMethods.CreatePipe(out childStdoutReadPipe, out childStdoutWritePipe, attributes, 0))
                     throw new Exception("Cannot create pipe for I/O.");
 
                 bufferLength = Math.Max(bufferLength, 1024);
                 bufferPointer = Marshal.AllocHGlobal(bufferLength);
                 var pBufferPointer = (byte*)bufferPointer.ToPointer();
 
-                var hr = WslNativeMethods.Api.WslLaunch(distroName, commandLine, false, stdin, writePipe, stderr, out child);
+                var hr = WslNativeMethods.Api.WslLaunch(distroName, commandLine, false, stdin, childStdoutWritePipe, stderr, out child);
 
                 if (hr < 0)
                     throw new COMException("Cannot launch WSL process", hr);
@@ -85,7 +85,7 @@ namespace WslSdk.Shared
                 {
                     Win32NativeMethods.RtlZeroMemory(bufferPointer, bufferLength);
 
-                    if (!Win32NativeMethods.ReadFile(readPipe, bufferPointer, bufferLength - 1, out read, IntPtr.Zero))
+                    if (!Win32NativeMethods.ReadFile(childStdoutReadPipe, bufferPointer, bufferLength - 1, out read, IntPtr.Zero))
                     {
                         var lastError = Marshal.GetLastWin32Error();
 
@@ -113,11 +113,11 @@ namespace WslSdk.Shared
                 if (bufferPointer != IntPtr.Zero)
                     Marshal.FreeHGlobal(bufferPointer);
 
-                if (writePipe != IntPtr.Zero)
-                    Win32NativeMethods.CloseHandle(writePipe);
+                if (childStdoutWritePipe != IntPtr.Zero)
+                    Win32NativeMethods.CloseHandle(childStdoutWritePipe);
 
-                if (readPipe != IntPtr.Zero)
-                    Win32NativeMethods.CloseHandle(readPipe);
+                if (childStdoutReadPipe != IntPtr.Zero)
+                    Win32NativeMethods.CloseHandle(childStdoutReadPipe);
 
                 if (child != IntPtr.Zero)
                     Win32NativeMethods.CloseHandle(child);
