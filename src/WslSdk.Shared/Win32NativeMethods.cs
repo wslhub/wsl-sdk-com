@@ -41,13 +41,10 @@ namespace WslSdk.Shared
             SetLastError = true,
             ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool PeekNamedPipe(
-            IntPtr hNamedPipe,
-            IntPtr lpBuffer,
-            [MarshalAs(UnmanagedType.U4)] int nBufferSize,
-            [Out, MarshalAs(UnmanagedType.U4)] out int lpBytesRead,
-            [Out, MarshalAs(UnmanagedType.U4)] out int lpTotalBytesAvail,
-            [Out, MarshalAs(UnmanagedType.U4)] out int lpBytesLeftThisMessage);
+        public static extern bool SetHandleInformation(
+            IntPtr hObject,
+            [MarshalAs(UnmanagedType.U4)] int dwMask,
+            [MarshalAs(UnmanagedType.U4)] int dwFlags);
 
         [SecurityCritical]
         [DllImport("kernel32.dll",
@@ -148,6 +145,10 @@ namespace WslSdk.Shared
             SW_RESTORE = 9,
             SW_SHOWDEFAULT = 10,
             SW_FORCEMINIMIZE = 11;
+
+        public static readonly int
+            HANDLE_FLAG_INHERIT = 0x00000001,
+            HANDLE_FLAG_PROTECT_FROM_CLOSE = 0x00000002;
 
         [StructLayout(LayoutKind.Sequential)]
         public class SECURITY_ATTRIBUTES
