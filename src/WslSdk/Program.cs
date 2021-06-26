@@ -9,6 +9,7 @@ namespace WslSdk
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        [STAThread]
         private static void Main(string[] args)
         {
             var result = ComNativeMethods.CoInitializeSecurity(
@@ -24,8 +25,6 @@ namespace WslSdk
 
             if (result != 0)
                 throw new COMException("Cannot complete CoInitializeSecurity.", result);
-
-            Console.WriteLine(string.Join(", ", args));
 
             // Run the out-of-process COM server
             WslComServer.Instance.Run();

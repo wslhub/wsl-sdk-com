@@ -1,12 +1,33 @@
 ﻿using System;
 using System.Threading;
+using System.Windows.Forms;
 using WslSdk.Interop;
 
 namespace WslSdk
 {
     internal sealed class WslComServer
     {
-        private WslComServer() { }
+        private WslComServer()
+        {
+            _exitMenuItem = new ToolStripMenuItem("E&xit")
+            {
+                Visible = true,
+            };
+            _exitMenuItem.Click += ExitMenuItem_Click;
+
+            _contextMenuStrip = new ContextMenuStrip()
+            {
+                Visible = false,
+            };
+            _contextMenuStrip.Items.Add(_exitMenuItem);
+
+            _notifyIcon = new NotifyIcon()
+            {
+                Icon = Properties.Resources.App,
+                ContextMenuStrip = _contextMenuStrip,
+                Visible = true,
+            };
+        }
 
         private static WslComServer _instance = new WslComServer();
 
@@ -28,7 +49,13 @@ namespace WslSdk
         private int _nLockCnt = 0;
 
         // The timer to trigger GC every 5 seconds
-        private Timer _gcTimer;
+        private System.Threading.Timer _gcTimer;
+
+        private NotifyIcon _notifyIcon;
+
+        private ContextMenuStrip _contextMenuStrip;
+
+        private ToolStripMenuItem _exitMenuItem;
 
         private int _cookieWslService;
 
@@ -103,7 +130,7 @@ namespace WslSdk
             _nLockCnt = 0;
 
             // Start the GC timer to trigger GC every 5 seconds.
-            _gcTimer = new Timer(new TimerCallback(GarbageCollect), null, 5000, 5000);
+            _gcTimer = new System.Threading.Timer(new TimerCallback(GarbageCollect), null, 5000, 5000);
         }
 
         /// <summary>
@@ -142,6 +169,17 @@ namespace WslSdk
             //
             // Perform the cleanup.
             // 
+
+            // Dispose GUI resources.
+            if (_contextMenuStrip != null)
+            {
+                _contextMenuStrip.Dispose();
+            }
+
+            if (_notifyIcon != null)
+            {
+                _notifyIcon.Dispose();
+            }
 
             // Dispose the GC timer.
             if (_gcTimer != null)
@@ -231,6 +269,23 @@ namespace WslSdk
         public int GetLockCount()
         {
             return _nLockCnt;
+        }
+
+        private void ExitMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_contextMenuStrip != null)
+            {
+                try { _contextMenuStrip.Visible = false; }
+                catch { }
+            }
+
+            if (_notifyIcon != null)
+            {
+                try { _notifyIcon.Visible = false; }
+                catch { }
+            }
+
+            Environment.Exit(0);
         }
     }
 }
