@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -194,6 +195,30 @@ namespace WslSdk.Shared
                 Win32NativeMethods.CloseHandle(readPipe);
                 Win32NativeMethods.CloseHandle(writePipe);
             }
+        }
+
+        public static string FindExistingPath(string distroName, params string[] unixPathCandidates)
+        {
+            var basePath = Path.Combine($@"\\wsl$\{distroName}");
+
+            if (!Directory.Exists(basePath))
+                return null;
+
+            var baseUri = new Uri(basePath.Replace("wsl$", "wsl.localhost"), UriKind.Absolute);
+
+            foreach (var eachUnixPathCandidate in unixPathCandidates)
+            {
+                if (!Uri.TryCreate(eachUnixPathCandidate, UriKind.Relative, out Uri unixPath))
+                    continue;
+
+                var combinedPath = new Uri(baseUri, unixPath);
+                var eachFullPath = combinedPath.LocalPath.Replace("wsl.localhost", "wsl$");
+
+                if (Directory.Exists(eachFullPath) || File.Exists(eachFullPath))
+                    return eachUnixPathCandidate;
+            }
+
+            return null;
         }
     }
 }
