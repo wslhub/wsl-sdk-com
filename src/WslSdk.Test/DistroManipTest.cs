@@ -85,6 +85,24 @@ namespace WslSdk.Test
         }
 
         [TestMethod]
+        public void Test_LinuxToWindowsPath_Recursive()
+        {
+            dynamic wslService = ActivateWslService();
+            var randomName = wslService.GenerateRandomName(true);
+            var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
+            var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
+
+            wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
+            var res = wslService.TranslateToWindowsPath(randomName, "/mnt/c/Windows");
+
+            Assert.IsNotNull(res);
+            Assert.IsTrue(res.Length > 0);
+            Assert.IsTrue(Directory.Exists(res));
+
+            wslService.UnregisterDistro(randomName);
+        }
+
+        [TestMethod]
         public void Test_WindowsToLinuxPath()
         {
             dynamic wslService = ActivateWslService();
