@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using WslSdk.Interop;
@@ -9,6 +10,12 @@ namespace WslSdk
     {
         private SdkApplication()
         {
+            _attachDebuggerMenuItem = new ToolStripMenuItem("&Attach Debugger...")
+            {
+                Visible = true,
+            };
+            _attachDebuggerMenuItem.Click += AttachDebuggerMenuItem_Click;
+
             _exitMenuItem = new ToolStripMenuItem("E&xit")
             {
                 Visible = true,
@@ -19,6 +26,7 @@ namespace WslSdk
             {
                 Visible = false,
             };
+            _contextMenuStrip.Items.Add(_attachDebuggerMenuItem);
             _contextMenuStrip.Items.Add(_exitMenuItem);
 
             _notifyIcon = new NotifyIcon()
@@ -55,6 +63,7 @@ namespace WslSdk
 
         private ContextMenuStrip _contextMenuStrip;
 
+        private ToolStripMenuItem _attachDebuggerMenuItem;
         private ToolStripMenuItem _exitMenuItem;
 
         private int _cookieWslService;
@@ -269,6 +278,11 @@ namespace WslSdk
         public int GetLockCount()
         {
             return _nLockCnt;
+        }
+
+        private void AttachDebuggerMenuItem_Click(object sender, EventArgs e)
+        {
+            Debugger.Launch();
         }
 
         private void ExitMenuItem_Click(object sender, EventArgs e)
