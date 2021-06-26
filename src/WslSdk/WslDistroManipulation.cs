@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using WslSdk.Models;
 using WslSdk.Shared;
@@ -213,20 +215,48 @@ namespace WslSdk
 
         public static void RegisterDistro(string distroName, string tarGzipFilePath, string targetDirectoryPath)
         {
+            if (string.IsNullOrWhiteSpace(distroName))
+                throw new ArgumentException("Distro name cannot be null reference or empty string.", nameof(distroName));
+
+            var distrorunPath = Path.Combine(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                "distrorun.exe");
+            Console.Out.WriteLine(distrorunPath);
+            if (!File.Exists(distrorunPath))
+                throw new FileNotFoundException("distrorun.exe required to run the distro registration.", distrorunPath);
+
             if (!File.Exists(tarGzipFilePath))
                 throw new ArgumentException("Selected tar.gz file does not exists.", nameof(tarGzipFilePath));
 
             if (!Directory.Exists(targetDirectoryPath))
                 Directory.CreateDirectory(targetDirectoryPath);
 
-            // To Do:
-            // It seems like WslRegsiterDistribution relies on QueryFullProcessImageName API to determine distro install location.
-            // To overcome the targetDirectoryPath ignoring issue, we need to create an additional stub executable file to handle registration process only.
+            var basePath = Path.GetDirectoryName(targetDirectoryPath);
+            var newLauncherPath = Path.Combine(basePath, distroName.TrimEnd('.') + ".exe");
+            var newRootfsPath = Path.Combine(basePath, "install.tar.gz");
 
-            var hr = WslNativeMethods.Api.WslRegisterDistribution(distroName, tarGzipFilePath);
+            File.Copy(distrorunPath, newLauncherPath, true);
+            File.Copy(tarGzipFilePath, newRootfsPath, true);
 
-            if (hr != 0)
-                throw new COMException($"Unexpected error occurred. ({hr:X8})", hr);
+            var launcherPsi = new ProcessStartInfo(newLauncherPath, "install")
+            {
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+            };
+
+            var process = new Process()
+            {
+                StartInfo = launcherPsi,
+                EnableRaisingEvents = true,
+            };
+
+            process.Start();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+                throw new Exception($"Process exit code is non-zero: {process.ExitCode} - {process.StandardOutput.ReadToEnd()}");
         }
 
         public static void UnregisterDistro(string distroName)
