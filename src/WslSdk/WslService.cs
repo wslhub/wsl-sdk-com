@@ -98,14 +98,36 @@ namespace WslSdk
             return targetDirectoryPath;
         }
 
-        public string TranslateToWindowsPath(string distroName, string linuxPath)
+        public string TranslateToWindowsPath(string distroName, string linuxAbsolutePath)
         {
-            return WslInteraction.RunWslCommand(distroName, $"/usr/bin/wslpath -a -w {linuxPath}");
+            var wslpathBinPath = WslInteraction.FindExistingPath(
+                distroName,
+                "/bin/wslpath", "/usr/bin/wslpath");
+            
+            var response = WslInteraction.RunWslCommand(distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}");
+
+            if (response == null)
+                throw new Exception("Cannot run wslpath executable.");
+
+            return response.Split(
+                new char[] { '\n' },
+                StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
         }
 
-        public string TranslateToLinuxPath(string distroName, string windowsPath)
+        public string TranslateToLinuxPath(string distroName, string windowsAbsolutePath)
         {
-            return WslInteraction.RunWslCommand(distroName, $"/usr/bin/wslpath -a -u {windowsPath}");
+            var wslpathBinPath = WslInteraction.FindExistingPath(
+                distroName,
+                "/bin/wslpath", "/usr/bin/wslpath");
+
+            var response =  WslInteraction.RunWslCommand(distroName, $"{wslpathBinPath} -a -u {windowsAbsolutePath}");
+
+            if (response == null)
+                throw new Exception("Cannot run wslpath executable.");
+
+            return response.Split(
+                new char[] { '\n' },
+                StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
         }
 
         public string CreateDriveMapping(string distroName, string desiredDriveLetter)
