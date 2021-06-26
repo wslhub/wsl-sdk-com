@@ -35,14 +35,12 @@ namespace WslSdk.Test
             var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
             var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
 
-            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
+            wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
             var res = wslService.RunWslCommand(randomName, "ls /");
-            var unregisterResult = wslService.UnregisterDistro(randomName);
+            wslService.UnregisterDistro(randomName);
 
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Length > 0);
-            Assert.IsTrue(registerResult);
-            Assert.IsTrue(unregisterResult);
         }
 
         [TestMethod]
@@ -53,19 +51,15 @@ namespace WslSdk.Test
             var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
             var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
 
-            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
+            wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
             dynamic queryResult = wslService.QueryDistroInfo(randomName);
             var res = wslService.RunWslCommand(randomName, "ls /");
-            var setDefaultUidResult = wslService.SetDefaultUid(randomName, queryResult.DefaultUid());
-            var setFlagResult = wslService.SetDistroFlags(randomName, queryResult.DistroFlags());
-            var unregisterResult = wslService.UnregisterDistro(randomName);
+            wslService.SetDefaultUid(randomName, queryResult.DefaultUid());
+            wslService.SetDistroFlags(randomName, queryResult.DistroFlags());
+            wslService.UnregisterDistro(randomName);
 
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Length > 0);
-            Assert.IsTrue(registerResult);
-            Assert.IsTrue(setDefaultUidResult);
-            Assert.IsTrue(setFlagResult);
-            Assert.IsTrue(unregisterResult);
 
             Assert.IsNotNull(randomName);
             Assert.AreNotEqual(queryResult.WslVersion(), 0);
@@ -80,15 +74,13 @@ namespace WslSdk.Test
             var busyboxRootfsFile = Path.GetFullPath("busybox.tgz");
             var tempDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WslSdkTest", randomName);
 
-            var registerResult = wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
+            wslService.RegisterDistro(randomName, busyboxRootfsFile, tempDirectory);
             var res = wslService.TranslateToWindowsPath(randomName, "/usr/bin");
-            var unregisterResult = wslService.UnregisterDistro(randomName);
+            wslService.UnregisterDistro(randomName);
 
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Length > 0);
             Assert.IsTrue(Directory.Exists(res));
-            Assert.IsTrue(registerResult);
-            Assert.IsTrue(unregisterResult);
         }
     }
 }
