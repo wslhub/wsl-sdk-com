@@ -26,10 +26,10 @@ namespace WslSdk
             if (result != 0)
                 throw new COMException("Cannot complete CoInitializeSecurity.", result);
 
-            //Win32NativeMethods.AllocConsole();
-            //var consoleWindowHandle = Win32NativeMethods.GetConsoleWindow();
-            //Win32NativeMethods.ShowWindow(consoleWindowHandle, Win32NativeMethods.SW_HIDE);
-            
+            Win32NativeMethods.AllocConsole();
+            var consoleWindowHandle = Win32NativeMethods.GetConsoleWindow();
+            Win32NativeMethods.ShowWindow(consoleWindowHandle, Win32NativeMethods.SW_HIDE);
+
             // Run the out-of-process COM server
             SdkApplication.Instance.Run();
         }
