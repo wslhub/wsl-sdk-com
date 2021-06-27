@@ -22,6 +22,7 @@ namespace WslSdk.Shared
             if (dataReceivedCallback == null)
                 throw new ArgumentNullException(nameof(dataReceivedCallback));
 
+            bufferLength = Math.Max(bufferLength, 1024);
             var isRegistered = WslNativeMethods.Api.WslIsDistributionRegistered(distroName);
 
             if (!isRegistered)
@@ -45,10 +46,9 @@ namespace WslSdk.Shared
 
             try
             {
-                if (!Win32NativeMethods.CreatePipe(out childStdoutReadPipe, out childStdoutWritePipe, attributes, 0))
+                if (!Win32NativeMethods.CreatePipe(out childStdoutReadPipe, out childStdoutWritePipe, attributes, bufferLength))
                     throw new Exception("Cannot create pipe for I/O.");
 
-                bufferLength = Math.Max(bufferLength, 1024);
                 bufferPointer = Marshal.AllocHGlobal(bufferLength);
                 var pBufferPointer = (byte*)bufferPointer.ToPointer();
 
@@ -84,6 +84,8 @@ namespace WslSdk.Shared
                 while (true)
                 {
                     Win32NativeMethods.RtlZeroMemory(bufferPointer, bufferLength);
+
+                    // Peek pipe data length
 
                     if (!Win32NativeMethods.ReadFile(childStdoutReadPipe, bufferPointer, bufferLength - 1, out read, IntPtr.Zero))
                     {
