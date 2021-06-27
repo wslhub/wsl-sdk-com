@@ -5,11 +5,11 @@ namespace WslSdk.Shared
 {
     [return: MarshalAs(UnmanagedType.Bool)]
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    public delegate bool WslIsDistributionRegisteredDelegate(
+    internal delegate bool WslIsDistributionRegisteredDelegate(
         string distributionName);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    public delegate int WslGetDistributionConfigurationDelegate(
+    internal delegate int WslGetDistributionConfigurationDelegate(
         string distributionName,
         [Out, MarshalAs(UnmanagedType.I4)] out int distributionVersion,
         [Out, MarshalAs(UnmanagedType.I4)] out int defaultUID,
@@ -18,7 +18,7 @@ namespace WslSdk.Shared
         [MarshalAs(UnmanagedType.I4)] out int defaultEnvironmentVariableCount);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    public delegate int WslLaunchDelegate(
+    internal delegate int WslLaunchDelegate(
         string distributionName,
         string command,
         [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory,
@@ -28,24 +28,24 @@ namespace WslSdk.Shared
         out IntPtr process);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    public delegate int WslLaunchInteractiveDelegate(
+    internal delegate int WslLaunchInteractiveDelegate(
         string distributionName,
         string command,
         [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory,
         [Out, MarshalAs(UnmanagedType.U4)] out int exitCode);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    public delegate int WslConfigureDistributionDelegate(
+    internal delegate int WslConfigureDistributionDelegate(
         string distributionName,
         [MarshalAs(UnmanagedType.I4)] int defaultUID,
         [MarshalAs(UnmanagedType.I4)] int wslDistributionFlags);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    public delegate int WslRegisterDistributionDelegate(
+    internal delegate int WslRegisterDistributionDelegate(
         string distributionName,
         string tarGzFilename);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-    public delegate int WslUnregisterDistributionDelegate(
+    internal delegate int WslUnregisterDistributionDelegate(
         string distributionName);
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32.SafeHandles;
+using System;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -22,6 +23,30 @@ namespace WslSdk.Shared
         [return: MarshalAs(UnmanagedType.U4)]
         public static extern int GetProcessId(
             IntPtr Process);
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
+            CharSet = CharSet.Ansi,
+            SetLastError = true)]
+        public static extern IntPtr GetCurrentProcess();
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CharSet = CharSet.Ansi,
+            CallingConvention = CallingConvention.Winapi,
+            SetLastError = true,
+            ExactSpelling = true,
+            BestFitMapping = false)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DuplicateHandle(
+            HandleRef hSourceProcessHandle,
+            SafeHandle hSourceHandle,
+            HandleRef hTargetProcess,
+            out SafeFileHandle targetHandle,
+            [MarshalAs(UnmanagedType.U4)] int dwDesiredAccess,
+            [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle,
+            [MarshalAs(UnmanagedType.U4)] int dwOptions);
 
         [SecurityCritical]
         [DllImport("kernel32.dll",
@@ -149,6 +174,10 @@ namespace WslSdk.Shared
         public static readonly int
             HANDLE_FLAG_INHERIT = 0x00000001,
             HANDLE_FLAG_PROTECT_FROM_CLOSE = 0x00000002;
+
+        public static readonly int
+            DUPLICATE_CLOSE_SOURCE = 1,
+            DUPLICATE_SAME_ACCESS = 2;
 
         [StructLayout(LayoutKind.Sequential)]
         public class SECURITY_ATTRIBUTES

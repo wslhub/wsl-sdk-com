@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace WslSdk.Shared
 {
-    public sealed class WslApiLoader : IDisposable
+    internal sealed class WslApiLoader : IDisposable
     {
         [DllImport("kernel32.dll", EntryPoint = "LoadLibraryW", ExactSpelling = true, CharSet = CharSet.Unicode)]
         private static extern IntPtr LoadLibrary(string librayName);

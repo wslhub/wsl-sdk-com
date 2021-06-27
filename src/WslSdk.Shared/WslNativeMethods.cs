@@ -2,7 +2,7 @@
 
 namespace WslSdk.Shared
 {
-    public static class WslNativeMethods
+    internal static class WslNativeMethods
     {
         private static readonly Lazy<WslApiLoader> _loader =
             new Lazy<WslApiLoader>(false);
