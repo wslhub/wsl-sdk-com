@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WslSdk.DistroLauncher", "Ws
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WslSdk.Shared", "WslSdk.Shared\WslSdk.Shared.shproj", "{65EA9756-6B62-4739-B9B5-F19CF9F059B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WslLaunchTest", "WslLaunchTest\WslLaunchTest.csproj", "{D59756B5-1065-4FD7-82F6-D7FDAB9B98B0}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		WslSdk.Shared\WslSdk.Shared.projitems*{65ea9756-6b62-4739-b9b5-f19cf9f059b3}*SharedItemsImports = 13
@@ -41,6 +43,10 @@ Global
 		{B578DF14-35A4-4C7D-BBF8-9E86782F50C2}.Debug|x64.Build.0 = Debug|x64
 		{B578DF14-35A4-4C7D-BBF8-9E86782F50C2}.Release|x64.ActiveCfg = Release|x64
 		{B578DF14-35A4-4C7D-BBF8-9E86782F50C2}.Release|x64.Build.0 = Release|x64
+		{D59756B5-1065-4FD7-82F6-D7FDAB9B98B0}.Debug|x64.ActiveCfg = Debug|x64
+		{D59756B5-1065-4FD7-82F6-D7FDAB9B98B0}.Debug|x64.Build.0 = Debug|x64
+		{D59756B5-1065-4FD7-82F6-D7FDAB9B98B0}.Release|x64.ActiveCfg = Release|x64
+		{D59756B5-1065-4FD7-82F6-D7FDAB9B98B0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
