@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace WslLaunchTest
 {
@@ -89,18 +84,6 @@ namespace WslLaunchTest
         [DllImport("kernel32.dll",
             CallingConvention = CallingConvention.Winapi,
             SetLastError = true,
-            ExactSpelling = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool CreatePipe(
-            out IntPtr hReadPipe,
-            out IntPtr hWritePipe,
-            SECURITY_ATTRIBUTES lpPipeAttributes,
-            [MarshalAs(UnmanagedType.U4)] int nSize);
-
-        [SecurityCritical]
-        [DllImport("kernel32.dll",
-            CallingConvention = CallingConvention.Winapi,
-            SetLastError = true,
             CharSet = CharSet.Ansi,
             ExactSpelling = true)]
         public static extern IntPtr CreateNamedPipeA(
@@ -127,6 +110,13 @@ namespace WslLaunchTest
             [MarshalAs(UnmanagedType.U4)] int dwCreationDisposition,
             [MarshalAs(UnmanagedType.U4)] int dwFlagsAndAttributes,
             IntPtr hTemplateFile);
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
+            ExactSpelling = true)]
+        public static extern void Sleep(
+            [MarshalAs(UnmanagedType.U4)] int dwMilliseconds);
 
         [SecurityCritical]
         [DllImport("kernel32.dll",
@@ -282,8 +272,6 @@ namespace WslLaunchTest
 
         public static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
-        public static volatile int PipeSerialNumber = 0;
-
         /*++
         Excerpted From: https://stackoverflow.com/questions/60645/overlapped-i-o-on-anonymous-pipe
 
@@ -344,7 +332,7 @@ namespace WslLaunchTest
             //
 
             size = Math.Max(size, 4096);
-            pipeName = $"\\\\.\\Pipe\\WslSdk.{(Process.GetCurrentProcess().Id):8x}.{(Interlocked.Increment(ref PipeSerialNumber)):8x}";
+            pipeName = $"\\\\.\\Pipe\\WslSdk.{(Process.GetCurrentProcess().Id):8x}.{(DateTime.Now.Ticks):8x}";
 
             readPipeHandleTemp = CreateNamedPipeA(
                 pipeName,
@@ -398,7 +386,7 @@ namespace WslLaunchTest
             // Test Arguments
             int bufferLength = 1024;
             string distroName = "Ubuntu-20.04";
-            string commandLine = "curl https://www.google.com";
+            string commandLine = "curl https://www.naver.com";
 
             var attributes = new SECURITY_ATTRIBUTES
             {
@@ -413,30 +401,20 @@ namespace WslLaunchTest
                 childStdoutWritePipe = IntPtr.Zero,
                 child = IntPtr.Zero;
 
-            var stdin = GetStdHandle(STD_INPUT_HANDLE);
-            //var stdout = GetStdHandle(STD_OUTPUT_HANDLE);
-            var stderr = GetStdHandle(STD_ERROR_HANDLE);
-
-            Action<ArraySegment<byte>> dataReceivedCallback = OnDataReceived;
+            var memStream = new MemoryStream();
 
             try
             {
-                if (!CreatePipeEx(out childStdoutReadPipe, out childStdoutWritePipe, attributes, bufferLength, FILE_FLAG_OVERLAPPED, FILE_FLAG_OVERLAPPED))
+                if (!CreatePipeEx(out childStdoutReadPipe, out childStdoutWritePipe, attributes, 0, FILE_FLAG_OVERLAPPED, FILE_FLAG_OVERLAPPED))
                     throw new Exception("Cannot create pipe for I/O.");
 
                 bufferPointer = Marshal.AllocHGlobal(bufferLength);
                 var pBufferPointer = (byte*)bufferPointer.ToPointer();
 
-                var hr = WslLaunch(distroName, commandLine, true, stdin, childStdoutWritePipe, stderr, out child);
+                var hr = WslLaunch(distroName, commandLine, true, IntPtr.Zero, childStdoutWritePipe, IntPtr.Zero, out child);
 
                 if (hr < 0)
                     throw new COMException("Cannot launch WSL process", hr);
-
-                if (childStdoutWritePipe != IntPtr.Zero)
-                {
-                    CloseHandle(childStdoutWritePipe);
-                    childStdoutWritePipe = IntPtr.Zero;
-                }
 
                 var buffer = new byte[bufferLength];
                 var read = 0;
@@ -459,7 +437,10 @@ namespace WslLaunchTest
                     {
                         Buffer.MemoryCopy(pBufferPointer, pBuffer, read, read);
                     }
-                    dataReceivedCallback.Invoke(new ArraySegment<byte>(buffer, 0, read));
+                    memStream.Write(buffer, 0, read);
+
+                    // Workaround for resolve blocking issue: There should be a better way. :-(
+                    Sleep(1);
 
                     if (read < bufferLength - 1)
                         break;
@@ -485,6 +466,10 @@ namespace WslLaunchTest
                 if (exitCode != 0)
                     throw new Exception($"Process exit code is non-zero: {exitCode}");
 
+                var enc = new UTF8Encoding(false);
+                var raw = memStream.ToArray();
+                var content = enc.GetString(raw, 0, raw.Length);
+                Console.Write(content);
                 Console.Read();
             }
             finally
@@ -500,14 +485,10 @@ namespace WslLaunchTest
 
                 if (child != IntPtr.Zero)
                     CloseHandle(child);
-            }
-        }
 
-        private static void OnDataReceived(ArraySegment<byte> obj)
-        {
-            var enc = new UTF8Encoding(false);
-            var str = enc.GetString(obj.Array, obj.Offset, obj.Count);
-            Console.Write(str);
+                if (memStream != null)
+                    memStream.Close();
+            }
         }
     }
 }
