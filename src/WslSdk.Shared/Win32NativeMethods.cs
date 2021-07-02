@@ -166,6 +166,16 @@ namespace WslSdk.Shared
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AllocConsole();
 
+        [DllImport("kernel32.dll", EntryPoint = "LoadLibraryW", ExactSpelling = true, CharSet = CharSet.Unicode)]
+        public static extern IntPtr LoadLibrary(string librayName);
+
+        [DllImport("kernel32.dll", EntryPoint = "GetProcAddress", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        public static extern IntPtr GetProcAddress(IntPtr libraryHandle, string procedureName);
+
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("kernel32.dll", EntryPoint = "FreeLibrary", ExactSpelling = true)]
+        public static extern bool FreeLibrary(IntPtr libraryHandle);
+
         [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         public static extern IntPtr GetConsoleWindow();
 

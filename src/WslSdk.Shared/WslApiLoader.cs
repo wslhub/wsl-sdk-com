@@ -5,51 +5,41 @@ namespace WslSdk.Shared
 {
     internal sealed class WslApiLoader : IDisposable
     {
-        [DllImport("kernel32.dll", EntryPoint = "LoadLibraryW", ExactSpelling = true, CharSet = CharSet.Unicode)]
-        private static extern IntPtr LoadLibrary(string librayName);
-
-        [DllImport("kernel32.dll", EntryPoint = "GetProcAddress", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        private static extern IntPtr GetProcAddress(IntPtr libraryHandle, string procedureName);
-
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("kernel32.dll", EntryPoint = "FreeLibrary", ExactSpelling = true)]
-        private static extern bool FreeLibrary(IntPtr libraryHandle);
-
         public WslApiLoader()
             : base()
         {
-            wslModuleHandle = LoadLibrary("wslapi.dll");
+            wslModuleHandle = Win32NativeMethods.LoadLibrary("wslapi.dll");
 
             if (wslModuleHandle == IntPtr.Zero)
                 throw new NotSupportedException("Cannot load wslapi.dll module from system.");
 
             IntPtr tempHandle;
 
-            tempHandle = GetProcAddress(wslModuleHandle, "WslIsDistributionRegistered");
+            tempHandle = Win32NativeMethods.GetProcAddress(wslModuleHandle, "WslIsDistributionRegistered");
             wslIsDistributionRegistered = (WslIsDistributionRegisteredDelegate)Marshal.GetDelegateForFunctionPointer(
                 tempHandle, typeof(WslIsDistributionRegisteredDelegate));
 
-            tempHandle = GetProcAddress(wslModuleHandle, "WslGetDistributionConfiguration");
+            tempHandle = Win32NativeMethods.GetProcAddress(wslModuleHandle, "WslGetDistributionConfiguration");
             wslGetDistributionConfiguration = (WslGetDistributionConfigurationDelegate)Marshal.GetDelegateForFunctionPointer(
                 tempHandle, typeof(WslGetDistributionConfigurationDelegate));
 
-            tempHandle = GetProcAddress(wslModuleHandle, "WslLaunch");
+            tempHandle = Win32NativeMethods.GetProcAddress(wslModuleHandle, "WslLaunch");
             wslLaunch = (WslLaunchDelegate)Marshal.GetDelegateForFunctionPointer(
                 tempHandle, typeof(WslLaunchDelegate));
 
-            tempHandle = GetProcAddress(wslModuleHandle, "WslLaunchInteractive");
+            tempHandle = Win32NativeMethods.GetProcAddress(wslModuleHandle, "WslLaunchInteractive");
             wslLaunchInteractive = (WslLaunchInteractiveDelegate)Marshal.GetDelegateForFunctionPointer(
                 tempHandle, typeof(WslLaunchInteractiveDelegate));
 
-            tempHandle = GetProcAddress(wslModuleHandle, "WslConfigureDistribution");
+            tempHandle = Win32NativeMethods.GetProcAddress(wslModuleHandle, "WslConfigureDistribution");
             wslConfigureDistribution = (WslConfigureDistributionDelegate)Marshal.GetDelegateForFunctionPointer(
                 tempHandle, typeof(WslConfigureDistributionDelegate));
 
-            tempHandle = GetProcAddress(wslModuleHandle, "WslRegisterDistribution");
+            tempHandle = Win32NativeMethods.GetProcAddress(wslModuleHandle, "WslRegisterDistribution");
             wslRegisterDistribution = (WslRegisterDistributionDelegate)Marshal.GetDelegateForFunctionPointer(
                 tempHandle, typeof(WslRegisterDistributionDelegate));
 
-            tempHandle = GetProcAddress(wslModuleHandle, "WslUnregisterDistribution");
+            tempHandle = Win32NativeMethods.GetProcAddress(wslModuleHandle, "WslUnregisterDistribution");
             wslUnregisterDistribution = (WslUnregisterDistributionDelegate)Marshal.GetDelegateForFunctionPointer(
                 tempHandle, typeof(WslUnregisterDistributionDelegate));
         }
@@ -106,7 +96,7 @@ namespace WslSdk.Shared
                 return;
 
             if (wslModuleHandle != IntPtr.Zero)
-                FreeLibrary(wslModuleHandle);
+                Win32NativeMethods.FreeLibrary(wslModuleHandle);
 
             wslModuleHandle = IntPtr.Zero;
             wslIsDistributionRegistered = null;
