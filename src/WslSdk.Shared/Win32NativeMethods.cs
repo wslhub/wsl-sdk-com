@@ -63,6 +63,23 @@ namespace WslSdk.Shared
         [SecurityCritical]
         [DllImport("kernel32.dll",
             CallingConvention = CallingConvention.Winapi,
+            EntryPoint = "CreateFileW",
+            CharSet = CharSet.Unicode,
+            SetLastError = true,
+            ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern IntPtr CreateFile(
+            string lpFileName,
+            [MarshalAs(UnmanagedType.U4)] int dwDesiredAccess,
+            [MarshalAs(UnmanagedType.U4)] int dwShareMode,
+            [In] ref SECURITY_ATTRIBUTES lpSecurityAttributes,
+            [MarshalAs(UnmanagedType.U4)] int dwCreationDisposition,
+            [MarshalAs(UnmanagedType.U4)] int dwFlagsAndAttributes,
+            IntPtr hTemplateFile);
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
             SetLastError = true,
             ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
