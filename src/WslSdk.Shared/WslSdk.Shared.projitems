@@ -9,12 +9,11 @@
     <Import_RootNamespace>WslSdk.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)AsyncStreamReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ComNativeMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Win32NativeMethods.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)WslInteraction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WslApiDelegates.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WslApiLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WslLauncher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WslNativeMethods.cs" />
   </ItemGroup>
 </Project>

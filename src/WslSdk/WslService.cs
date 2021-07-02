@@ -45,7 +45,7 @@ namespace WslSdk
 
         public string RunWslCommand(string distroName, string commandLine)
         {
-            return WslInteraction.RunWslCommand(distroName, commandLine);
+            return WslLauncher.RunCommand(distroName, commandLine, useCurrentWorkingDirectory: false);
         }
 
         public DistroRegistryInfo GetDistroInfo(string distroName)
@@ -100,11 +100,11 @@ namespace WslSdk
 
         public string TranslateToWindowsPath(string distroName, string linuxAbsolutePath)
         {
-            var wslpathBinPath = WslInteraction.FindExistingPath(
+            var wslpathBinPath = Helpers.FindExistingPath(
                 distroName,
                 "/bin/wslpath", "/usr/bin/wslpath");
             
-            var response = WslInteraction.RunWslCommand(distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}");
+            var response = WslLauncher.RunCommand(distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}", false);
 
             if (response == null)
                 throw new Exception("Cannot run wslpath executable.");
@@ -116,11 +116,11 @@ namespace WslSdk
 
         public string TranslateToLinuxPath(string distroName, string windowsAbsolutePath)
         {
-            var wslpathBinPath = WslInteraction.FindExistingPath(
+            var wslpathBinPath = Helpers.FindExistingPath(
                 distroName,
                 "/bin/wslpath", "/usr/bin/wslpath");
 
-            var response =  WslInteraction.RunWslCommand(distroName, $"{wslpathBinPath} -a -u {windowsAbsolutePath}");
+            var response = WslLauncher.RunCommand(distroName, $"{wslpathBinPath} -a -u {windowsAbsolutePath}", false);
 
             if (response == null)
                 throw new Exception("Cannot run wslpath executable.");
@@ -134,11 +134,11 @@ namespace WslSdk
         {
             try
             {
-                var wslpathBinPath = WslInteraction.FindExistingPath(
+                var wslpathBinPath = Helpers.FindExistingPath(
                     distroName,
                     "/bin/wslpath", "/usr/bin/wslpath");
 
-                var response = WslInteraction.RunWslCommand(distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}");
+                var response = WslLauncher.RunCommand(distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}", false);
 
                 if (response == null)
                     throw new Exception("Cannot run wslpath executable.");

@@ -57,7 +57,7 @@ namespace WslSdk.Shared
         public static extern bool CreatePipe(
             out IntPtr hReadPipe,
             out IntPtr hWritePipe,
-            SECURITY_ATTRIBUTES lpPipeAttributes,
+            [In] ref SECURITY_ATTRIBUTES lpPipeAttributes,
             [MarshalAs(UnmanagedType.U4)] int nSize);
 
         [SecurityCritical]
@@ -108,6 +108,19 @@ namespace WslSdk.Shared
             IntPtr lpBuffer,
             [MarshalAs(UnmanagedType.U4)] int nNumberOfBytesToRead,
             [MarshalAs(UnmanagedType.U4)] out int lpNumberOfBytesRead,
+            IntPtr lpOverlapped);
+
+        [DllImport("kernel32.dll",
+            CallingConvention = CallingConvention.Winapi,
+            EntryPoint = "WriteFile",
+            SetLastError = true,
+            ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool WriteFile(
+            IntPtr hFile,
+            IntPtr lpBuffer,
+            [MarshalAs(UnmanagedType.U4)] int nNumberOfBytesToWrite,
+            [MarshalAs(UnmanagedType.U4)] out int lpNumberOfBytesWritten,
             IntPtr lpOverlapped);
 
         [SecurityCritical]
@@ -197,7 +210,7 @@ namespace WslSdk.Shared
             DUPLICATE_SAME_ACCESS = 2;
 
         [StructLayout(LayoutKind.Sequential)]
-        public class SECURITY_ATTRIBUTES
+        public struct SECURITY_ATTRIBUTES
         {
             [MarshalAs(UnmanagedType.U4)]
             public int nLength;
