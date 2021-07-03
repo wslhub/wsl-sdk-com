@@ -51,6 +51,45 @@ namespace WslSdk.Test
         }
 
         [TestMethod]
+        public void Test_EmptyCommand_0()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            try
+            {
+                wslService.RunWslCommand(defaultDistroName, null);
+                Assert.Fail();
+            }
+            catch { }
+        }
+
+        [TestMethod]
+        public void Test_EmptyCommand_1()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            try
+            {
+                wslService.RunWslCommand(defaultDistroName, string.Empty);
+                Assert.Fail();
+            }
+            catch { }
+        }
+
+        [TestMethod]
+        public void Test_EmptyCommand_2()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            try
+            {
+                wslService.RunWslCommand(defaultDistroName, new string(' ', 128));
+                Assert.Fail();
+            }
+            catch { }
+        }
+
+        [TestMethod]
         public void Test_CurlSimple()
         {
             dynamic wslService = ActivateWslService();

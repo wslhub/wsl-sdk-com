@@ -22,6 +22,12 @@ namespace WslSdk.Shared
             Action<byte[]> stderr = null,
             int bufferSize = DefaultBufferSize)
         {
+            if (string.IsNullOrWhiteSpace(distroName))
+                throw new ArgumentException("Distro name is required.", nameof(distroName));
+
+            if (string.IsNullOrWhiteSpace(command))
+                throw new ArgumentException("Command string is required.", nameof(command));
+
             using (var wsl = new WslLauncher(apiLoader, distroName, command, bufferSize))
             {
                 return wsl.Start(useCurrentWorkingDirectory, out stdinWrittenByte, stdin, stdout, stderr);
