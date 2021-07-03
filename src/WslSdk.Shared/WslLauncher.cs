@@ -12,6 +12,7 @@ namespace WslSdk.Shared
         public const int DefaultBufferSize = 65536;
 
         public static int? RunWslCommandAsStream(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -21,13 +22,14 @@ namespace WslSdk.Shared
             Action<byte[]> stderr = null,
             int bufferSize = DefaultBufferSize)
         {
-            using (var wsl = new WslLauncher(distroName, command, bufferSize))
+            using (var wsl = new WslLauncher(apiLoader, distroName, command, bufferSize))
             {
                 return wsl.Start(useCurrentWorkingDirectory, out stdinWrittenByte, stdin, stdout, stderr);
             }
         }
 
         public static int? RunWslCommandAsStream(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -36,10 +38,11 @@ namespace WslSdk.Shared
             Action<byte[]> stderr = null,
             int bufferSize = DefaultBufferSize)
         {
-            return RunWslCommandAsStream(distroName, command, useCurrentWorkingDirectory, out _, stdin, stdout, stderr, bufferSize);
+            return RunWslCommandAsStream(apiLoader, distroName, command, useCurrentWorkingDirectory, out _, stdin, stdout, stderr, bufferSize);
         }
 
         public static int? RunCommandAsString(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -52,7 +55,7 @@ namespace WslSdk.Shared
         {
             targetEncoding = targetEncoding ?? new UTF8Encoding(false);
 
-            return RunWslCommandAsStream(distroName, command, useCurrentWorkingDirectory, out stdinWrittenByte,
+            return RunWslCommandAsStream(apiLoader, distroName, command, useCurrentWorkingDirectory, out stdinWrittenByte,
                 stdin: stdin,
                 stdout: data => stdout?.Invoke(targetEncoding.GetString(data, 0, data.Length)),
                 stderr: data => stderr?.Invoke(targetEncoding.GetString(data, 0, data.Length)),
@@ -60,6 +63,7 @@ namespace WslSdk.Shared
         }
 
         public static int? RunCommandAsString(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -69,10 +73,11 @@ namespace WslSdk.Shared
             Action<string> stderr = null,
             int bufferSize = DefaultBufferSize)
         {
-            return RunCommandAsString(distroName, command, useCurrentWorkingDirectory, out _, targetEncoding, stdin, stdout, stderr, bufferSize);
+            return RunCommandAsString(apiLoader, distroName, command, useCurrentWorkingDirectory, out _, targetEncoding, stdin, stdout, stderr, bufferSize);
         }
 
         public static int? GetCommandStdout(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -85,12 +90,13 @@ namespace WslSdk.Shared
             if (stdout == null)
                 stdout = new StringWriter();
 
-            return RunCommandAsString(distroName, command, useCurrentWorkingDirectory,
+            return RunCommandAsString(apiLoader, distroName, command, useCurrentWorkingDirectory,
                 out stdinWrittenByte, targetEncoding,
                 stdin, stdout: data => stdout.Write(data), stderr: null, bufferSize);
         }
 
         public static int? GetCommandStdout(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -99,12 +105,14 @@ namespace WslSdk.Shared
             TextWriter stdout = null,
             int bufferSize = DefaultBufferSize)
         {
-            return GetCommandStdout(distroName, command, useCurrentWorkingDirectory,
+            return GetCommandStdout(apiLoader,
+                distroName, command, useCurrentWorkingDirectory,
                 out _, targetEncoding,
                 stdin, stdout, bufferSize);
         }
 
         public static string GetCommandStdoutAsString(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -116,7 +124,7 @@ namespace WslSdk.Shared
             var buffer = new StringBuilder();
             var writer = new StringWriter(buffer);
 
-            GetCommandStdout(distroName, command, useCurrentWorkingDirectory,
+            GetCommandStdout(apiLoader, distroName, command, useCurrentWorkingDirectory,
                 out stdinWrittenByte, targetEncoding, stdin, writer, bufferSize);
 
             writer.Flush();
@@ -124,6 +132,7 @@ namespace WslSdk.Shared
         }
 
         public static string GetCommandStdoutAsString(
+            WslApiLoader apiLoader,
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -134,17 +143,18 @@ namespace WslSdk.Shared
             var buffer = new StringBuilder();
             var writer = new StringWriter(buffer);
 
-            GetCommandStdout(distroName, command, useCurrentWorkingDirectory,
+            GetCommandStdout(apiLoader, distroName, command, useCurrentWorkingDirectory,
                 out _, targetEncoding, stdin, writer, bufferSize);
 
             writer.Flush();
             return buffer.ToString();
         }
 
-        private WslLauncher(string distroName, string command, int bufferSize = DefaultBufferSize)
+        private WslLauncher(WslApiLoader apiLoader, string distroName, string command, int bufferSize = DefaultBufferSize)
             : base()
         {
             _disposed = false;
+            _apiLoader = apiLoader;
             _distroName = distroName;
             _command = command;
             _bufferSize = Math.Max(1024, bufferSize);
@@ -201,6 +211,7 @@ namespace WslSdk.Shared
         }
 
         private bool _disposed;
+        private WslApiLoader _apiLoader;
 
         private int _bufferSize;
         private SafeFileHandle _hChildStd_IN_Rd;
@@ -217,7 +228,7 @@ namespace WslSdk.Shared
         // Create a child process that uses the previously created pipes for STDIN and STDOUT.
         private SafeProcessHandle CreateWslProcess(bool useCurrentWorkingDirectory)
         {
-            int hr = WslNativeMethods.Api.WslLaunch(_distroName, _command, useCurrentWorkingDirectory,
+            int hr = _apiLoader.WslLaunch(_distroName, _command, useCurrentWorkingDirectory,
                 stdIn: _hChildStd_IN_Rd,
                 stdOut: _hChildStd_OUT_Wr,
                 stdErr: _hChildStd_ERR_Wr,

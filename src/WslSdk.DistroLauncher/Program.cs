@@ -67,7 +67,7 @@ namespace WslSdk.DistroLauncher
         internal static int QueryUid(string distroName, string userName)
         {
             string command = $"/usr/bin/id -u {userName}";
-            string content = WslLauncher.GetCommandStdoutAsString(distroName, command, false);
+            string content = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, command, false);
 
             if (!int.TryParse(content, out int uid))
                 return (-1); // UID_INVALID
