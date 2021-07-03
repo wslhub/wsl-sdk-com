@@ -66,7 +66,7 @@ namespace WslSdk.Test
         {
             dynamic wslService = ActivateWslService();
             var defaultDistroName = wslService.GetDefaultDistroName();
-            var res = wslService.RunWslCommand(defaultDistroName, "curl https://www.google.com");
+            var res = wslService.RunWslCommand(defaultDistroName, "curl https://www.naver.com");
 
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Length > 0);
