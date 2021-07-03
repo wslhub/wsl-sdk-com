@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace WslSdk.Shared
 {
-    public sealed class WslLauncher : IDisposable
+    internal sealed class WslLauncher : IDisposable
     {
         public const int DefaultBufferSize = 65536;
 
@@ -160,6 +160,12 @@ namespace WslSdk.Shared
         // Read from a file and write its contents to the pipe for the child's STDIN. Stop when there is no more data. 
         private long WriteToStdinPipe(Stream stream)
         {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
+            if (!stream.CanRead)
+                throw new ArgumentException("Selected stream does not support read function.", nameof(stream));
+
             long lTotal = 0L;
             int dwRead, dwWritten;
             bool bSuccess;
