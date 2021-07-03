@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32.SafeHandles;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -143,18 +144,10 @@ namespace WslSdk.Shared
         private WslLauncher(string distroName, string command, int bufferSize = DefaultBufferSize)
             : base()
         {
+            _disposed = false;
             _distroName = distroName;
             _command = command;
             _bufferSize = Math.Max(1024, bufferSize);
-
-            _disposed = false;
-
-            _hChildStd_IN_Rd = IntPtr.Zero;
-            _hChildStd_IN_Wr = IntPtr.Zero;
-            _hChildStd_OUT_Rd = IntPtr.Zero;
-            _hChildStd_OUT_Wr = IntPtr.Zero;
-            _hChildStd_ERR_Rd = IntPtr.Zero;
-            _hChildStd_ERR_Wr = IntPtr.Zero;
 
             _securityAttributes = new Win32NativeMethods.SECURITY_ATTRIBUTES()
             {
@@ -190,7 +183,7 @@ namespace WslSdk.Shared
 
         private int? Start(bool useCurrentWorkingDirectory, out long stdinWrittenByte, Stream stdin = null, Action<byte[]> stdout = null, Action<byte[]> stderr = null)
         {
-            IntPtr hProcess = CreateWslProcess(useCurrentWorkingDirectory);
+            SafeProcessHandle hProcess = CreateWslProcess(useCurrentWorkingDirectory);
             stdinWrittenByte = 0L;
 
             if (stdin != null)
@@ -203,44 +196,44 @@ namespace WslSdk.Shared
             if (Win32NativeMethods.GetExitCodeProcess(hProcess, out int exitCode))
                 result = exitCode;
 
-            Win32NativeMethods.CloseHandle(hProcess);
+            hProcess.Close();
             return result;
         }
 
         private bool _disposed;
 
         private int _bufferSize;
-        private IntPtr _hChildStd_IN_Rd;
-        private IntPtr _hChildStd_IN_Wr;
-        private IntPtr _hChildStd_OUT_Rd;
-        private IntPtr _hChildStd_OUT_Wr;
-        private IntPtr _hChildStd_ERR_Rd;
-        private IntPtr _hChildStd_ERR_Wr;
+        private SafeFileHandle _hChildStd_IN_Rd;
+        private SafeFileHandle _hChildStd_IN_Wr;
+        private SafeFileHandle _hChildStd_OUT_Rd;
+        private SafeFileHandle _hChildStd_OUT_Wr;
+        private SafeFileHandle _hChildStd_ERR_Rd;
+        private SafeFileHandle _hChildStd_ERR_Wr;
         private Win32NativeMethods.SECURITY_ATTRIBUTES _securityAttributes;
 
         private readonly string _distroName;
         private readonly string _command;
 
         // Create a child process that uses the previously created pipes for STDIN and STDOUT.
-        private IntPtr CreateWslProcess(bool useCurrentWorkingDirectory)
+        private SafeProcessHandle CreateWslProcess(bool useCurrentWorkingDirectory)
         {
             int hr = WslNativeMethods.Api.WslLaunch(_distroName, _command, useCurrentWorkingDirectory,
                 stdIn: _hChildStd_IN_Rd,
                 stdOut: _hChildStd_OUT_Wr,
                 stdErr: _hChildStd_ERR_Wr,
-                out IntPtr hProcess);
+                out SafeProcessHandle hProcess);
 
             if (hr != 0)
                 throw new COMException("Unexpected error occurred.", hr);
 
-            Win32NativeMethods.CloseHandle(_hChildStd_OUT_Wr);
-            _hChildStd_OUT_Wr = IntPtr.Zero;
+            _hChildStd_OUT_Wr.Close();
+            _hChildStd_OUT_Wr.SetHandleAsInvalid();
 
-            Win32NativeMethods.CloseHandle(_hChildStd_ERR_Wr);
-            _hChildStd_ERR_Wr = IntPtr.Zero;
+            _hChildStd_ERR_Wr.Close();
+            _hChildStd_ERR_Wr.SetHandleAsInvalid();
 
-            Win32NativeMethods.CloseHandle(_hChildStd_IN_Rd);
-            _hChildStd_IN_Rd = IntPtr.Zero;
+            _hChildStd_IN_Rd.Close();
+            _hChildStd_IN_Rd.SetHandleAsInvalid();
 
             return hProcess;
         }
@@ -285,10 +278,11 @@ namespace WslSdk.Shared
                     chBuf = IntPtr.Zero;
                 }
 
-                if (!Win32NativeMethods.CloseHandle(_hChildStd_IN_Wr))
-                    throw new Exception("StdInWr CloseHandle");
-
-                _hChildStd_IN_Wr = IntPtr.Zero;
+                if (!_hChildStd_IN_Wr.IsInvalid && !_hChildStd_IN_Wr.IsClosed)
+                {
+                    _hChildStd_IN_Wr.Close();
+                    _hChildStd_IN_Wr.SetHandleAsInvalid();
+                }
             }
         }
 
@@ -369,40 +363,40 @@ namespace WslSdk.Shared
                     // dispose managed state (managed objects)
                 }
 
-                if (_hChildStd_IN_Rd != IntPtr.Zero)
+                if (!_hChildStd_IN_Rd.IsInvalid && !_hChildStd_IN_Rd.IsClosed)
                 {
-                    Win32NativeMethods.CloseHandle(_hChildStd_IN_Rd);
-                    _hChildStd_IN_Rd = IntPtr.Zero;
+                    _hChildStd_IN_Rd.Close();
+                    _hChildStd_IN_Rd.SetHandleAsInvalid();
                 }
 
-                if (_hChildStd_IN_Wr != IntPtr.Zero)
+                if (!_hChildStd_IN_Wr.IsInvalid && !_hChildStd_IN_Wr.IsClosed)
                 {
-                    Win32NativeMethods.CloseHandle(_hChildStd_IN_Wr);
-                    _hChildStd_IN_Wr = IntPtr.Zero;
+                    _hChildStd_IN_Wr.Close();
+                    _hChildStd_IN_Wr.SetHandleAsInvalid();
                 }
 
-                if (_hChildStd_OUT_Rd != IntPtr.Zero)
+                if (!_hChildStd_OUT_Rd.IsInvalid && !_hChildStd_OUT_Rd.IsClosed)
                 {
-                    Win32NativeMethods.CloseHandle(_hChildStd_OUT_Rd);
-                    _hChildStd_OUT_Rd = IntPtr.Zero;
+                    _hChildStd_OUT_Rd.Close();
+                    _hChildStd_OUT_Rd.SetHandleAsInvalid();
                 }
 
-                if (_hChildStd_OUT_Wr != IntPtr.Zero)
+                if (!_hChildStd_OUT_Wr.IsInvalid && !_hChildStd_OUT_Wr.IsClosed)
                 {
-                    Win32NativeMethods.CloseHandle(_hChildStd_OUT_Wr);
-                    _hChildStd_OUT_Wr = IntPtr.Zero;
+                    _hChildStd_OUT_Wr.Close();
+                    _hChildStd_OUT_Wr.SetHandleAsInvalid();
                 }
 
-                if (_hChildStd_ERR_Rd != IntPtr.Zero)
+                if (!_hChildStd_ERR_Rd.IsInvalid && !_hChildStd_ERR_Rd.IsClosed)
                 {
-                    Win32NativeMethods.CloseHandle(_hChildStd_ERR_Rd);
-                    _hChildStd_ERR_Rd = IntPtr.Zero;
+                    _hChildStd_ERR_Rd.Close();
+                    _hChildStd_ERR_Rd.SetHandleAsInvalid();
                 }
 
-                if (_hChildStd_ERR_Wr != IntPtr.Zero)
+                if (!_hChildStd_ERR_Wr.IsInvalid && !_hChildStd_ERR_Wr.IsClosed)
                 {
-                    Win32NativeMethods.CloseHandle(_hChildStd_ERR_Wr);
-                    _hChildStd_ERR_Wr = IntPtr.Zero;
+                    _hChildStd_ERR_Wr.Close();
+                    _hChildStd_ERR_Wr.SetHandleAsInvalid();
                 }
 
                 _disposed = true;

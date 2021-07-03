@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32.SafeHandles;
+using System;
 using System.Runtime.InteropServices;
 
 namespace WslSdk.Shared
@@ -22,10 +23,10 @@ namespace WslSdk.Shared
         string distributionName,
         string command,
         [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory,
-        IntPtr stdIn,
-        IntPtr stdOut,
-        IntPtr stdErr,
-        out IntPtr process);
+        SafeFileHandle stdIn,
+        SafeFileHandle stdOut,
+        SafeFileHandle stdErr,
+        out SafeProcessHandle process);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
     internal delegate int WslLaunchInteractiveDelegate(
