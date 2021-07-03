@@ -16,6 +16,8 @@ namespace WslSdk.Contracts
 
         string RunWslCommand(string distroName, string commandLine);
 
+        string RunWslCommandWithInput(string distroName, string commandLine, string inputFilePath);
+
         DistroRegistryInfo GetDistroInfo(string distroName);
 
         string GetDefaultDistroName();

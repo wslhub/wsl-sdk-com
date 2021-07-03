@@ -10,7 +10,7 @@ namespace WslSdk.Shared
     {
         public const int DefaultBufferSize = 65536;
 
-        public static int? RunCommand(
+        public static int? RunWslCommandAsStream(
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
@@ -26,29 +26,117 @@ namespace WslSdk.Shared
             }
         }
 
-        public static int? RunCommand(
+        public static int? RunWslCommandAsStream(
             string distroName,
             string command,
             bool useCurrentWorkingDirectory,
             Stream stdin = null,
             Action<byte[]> stdout = null,
             Action<byte[]> stderr = null,
-            int bufferSIze = DefaultBufferSize)
+            int bufferSize = DefaultBufferSize)
         {
-            return RunCommand(distroName, command, useCurrentWorkingDirectory, out _, stdin, stdout, stderr, bufferSIze);
+            return RunWslCommandAsStream(distroName, command, useCurrentWorkingDirectory, out _, stdin, stdout, stderr, bufferSize);
         }
 
-        public static string RunCommand(
+        public static int? RunCommandAsString(
             string distroName,
             string command,
-            bool useCurrentWorkingDirectory)
+            bool useCurrentWorkingDirectory,
+            out long stdinWrittenByte,
+            Encoding targetEncoding = null,
+            Stream stdin = null,
+            Action<string> stdout = null,
+            Action<string> stderr = null,
+            int bufferSize = DefaultBufferSize)
         {
-            var encoding = new UTF8Encoding(false);
+            targetEncoding = targetEncoding ?? new UTF8Encoding(false);
+
+            return RunWslCommandAsStream(distroName, command, useCurrentWorkingDirectory, out stdinWrittenByte,
+                stdin: stdin,
+                stdout: data => stdout?.Invoke(targetEncoding.GetString(data, 0, data.Length)),
+                stderr: data => stderr?.Invoke(targetEncoding.GetString(data, 0, data.Length)),
+                bufferSize);
+        }
+
+        public static int? RunCommandAsString(
+            string distroName,
+            string command,
+            bool useCurrentWorkingDirectory,
+            Encoding targetEncoding = null,
+            Stream stdin = null,
+            Action<string> stdout = null,
+            Action<string> stderr = null,
+            int bufferSize = DefaultBufferSize)
+        {
+            return RunCommandAsString(distroName, command, useCurrentWorkingDirectory, out _, targetEncoding, stdin, stdout, stderr, bufferSize);
+        }
+
+        public static int? GetCommandStdout(
+            string distroName,
+            string command,
+            bool useCurrentWorkingDirectory,
+            out long stdinWrittenByte,
+            Encoding targetEncoding = null,
+            Stream stdin = null,
+            TextWriter stdout = null,
+            int bufferSize = DefaultBufferSize)
+        {
+            if (stdout == null)
+                stdout = new StringWriter();
+
+            return RunCommandAsString(distroName, command, useCurrentWorkingDirectory,
+                out stdinWrittenByte, targetEncoding,
+                stdin, stdout: data => stdout.Write(data), stderr: null, bufferSize);
+        }
+
+        public static int? GetCommandStdout(
+            string distroName,
+            string command,
+            bool useCurrentWorkingDirectory,
+            Encoding targetEncoding = null,
+            Stream stdin = null,
+            TextWriter stdout = null,
+            int bufferSize = DefaultBufferSize)
+        {
+            return GetCommandStdout(distroName, command, useCurrentWorkingDirectory,
+                out _, targetEncoding,
+                stdin, stdout, bufferSize);
+        }
+
+        public static string GetCommandStdoutAsString(
+            string distroName,
+            string command,
+            bool useCurrentWorkingDirectory,
+            out long stdinWrittenByte,
+            Encoding targetEncoding = null,
+            Stream stdin = null,
+            int bufferSize = DefaultBufferSize)
+        {
             var buffer = new StringBuilder();
+            var writer = new StringWriter(buffer);
 
-            RunCommand(distroName, command, useCurrentWorkingDirectory,
-                stdout: data => buffer.Append(encoding.GetString(data, 0, data.Length)));
+            GetCommandStdout(distroName, command, useCurrentWorkingDirectory,
+                out stdinWrittenByte, targetEncoding, stdin, writer, bufferSize);
 
+            writer.Flush();
+            return buffer.ToString();
+        }
+
+        public static string GetCommandStdoutAsString(
+            string distroName,
+            string command,
+            bool useCurrentWorkingDirectory,
+            Encoding targetEncoding = null,
+            Stream stdin = null,
+            int bufferSize = DefaultBufferSize)
+        {
+            var buffer = new StringBuilder();
+            var writer = new StringWriter(buffer);
+
+            GetCommandStdout(distroName, command, useCurrentWorkingDirectory,
+                out _, targetEncoding, stdin, writer, bufferSize);
+
+            writer.Flush();
             return buffer.ToString();
         }
 

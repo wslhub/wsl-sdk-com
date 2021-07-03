@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
+using System.Text;
 
 namespace WslSdk.Test
 {
@@ -11,6 +13,41 @@ namespace WslSdk.Test
             var wslServiceType = Type.GetTypeFromProgID("WslSdk.WslService");
             dynamic wslService = Activator.CreateInstance(wslServiceType);
             return wslService;
+        }
+
+        private string GenerateRandomLatinText(int minWords = 10, int maxWords = 30,
+            int minSentences = 2, int maxSentences = 5,
+            int numParagraphs = 3)
+        {
+            // https://stackoverflow.com/questions/4286487/is-there-any-lorem-ipsum-generator-in-c
+
+            var words = new string[] {
+                "lorem", "ipsum", "dolor", "sit", "amet", "consectetuer",
+                "adipiscing", "elit", "sed", "diam", "nonummy", "nibh", "euismod",
+                "tincidunt", "ut", "laoreet", "dolore", "magna", "aliquam", "erat"
+            };
+
+            var rand = new Random();
+            int numSentences = rand.Next(maxSentences - minSentences)
+                + minSentences + 1;
+            int numWords = rand.Next(maxWords - minWords) + minWords + 1;
+
+            var result = new StringBuilder();
+
+            for (int p = 0; p < numParagraphs; p++)
+            {
+                for (int s = 0; s < numSentences; s++)
+                {
+                    for (int w = 0; w < numWords; w++)
+                    {
+                        if (w > 0) { result.Append(" "); }
+                        result.Append(words[rand.Next(words.Length)]);
+                    }
+                    result.Append(". ");
+                }
+            }
+
+            return result.ToString();
         }
 
         [TestMethod]
@@ -36,5 +73,34 @@ namespace WslSdk.Test
             Assert.IsTrue(res.Contains("</html>"));
         }
 
+        [TestMethod]
+        public void Test_CatTest()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+
+            var tempFilePath = Path.Combine(
+                Path.GetTempPath(),
+                Guid.NewGuid().ToString("n") + ".txt");
+            var content = GenerateRandomLatinText();
+            File.WriteAllText(tempFilePath, content, new UTF8Encoding(false));
+
+            try
+            {
+                var res = wslService.RunWslCommandWithInput(defaultDistroName, "cat", tempFilePath);
+
+                Assert.IsNotNull(res);
+                Assert.IsTrue(res.Length > 0);
+                Assert.IsTrue(res.Equals(content, StringComparison.Ordinal));
+            }
+            finally
+            {
+                if (tempFilePath != null && File.Exists(tempFilePath))
+                {
+                    try { File.Delete(tempFilePath); }
+                    catch { }
+                }
+            }
+        }
     }
 }
