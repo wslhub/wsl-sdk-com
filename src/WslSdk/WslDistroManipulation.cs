@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using WslSdk.Models;
@@ -218,13 +219,6 @@ namespace WslSdk
             if (string.IsNullOrWhiteSpace(distroName))
                 throw new ArgumentException("Distro name cannot be null reference or empty string.", nameof(distroName));
 
-            var distrorunPath = Path.Combine(
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                "distrorun.exe");
-
-            if (!File.Exists(distrorunPath))
-                throw new FileNotFoundException("distrorun.exe required to run the distro registration.", distrorunPath);
-
             if (!File.Exists(tarGzipFilePath))
                 throw new ArgumentException("Selected tar.gz file does not exists.", nameof(tarGzipFilePath));
 
@@ -234,7 +228,19 @@ namespace WslSdk
             var newLauncherPath = Path.Combine(targetDirectoryPath, distroName.TrimEnd('.') + ".exe");
             var newRootfsPath = Path.Combine(targetDirectoryPath, "install.tar.gz");
 
-            File.Copy(distrorunPath, newLauncherPath, true);
+            // Copy embedded distrorun.exe to specific path
+            var assembly = typeof(Program).Assembly;
+            var distrorunResourceName = assembly.GetManifestResourceNames().Where(x => x.EndsWith("distrorun.exe", StringComparison.Ordinal)).FirstOrDefault();
+
+            if (File.Exists(newLauncherPath))
+                File.Delete(newLauncherPath);
+
+            using (var stream = assembly.GetManifestResourceStream(distrorunResourceName))
+            using (var fileStream = File.OpenWrite(newLauncherPath))
+            {
+                stream.CopyTo(fileStream);
+            }
+
             File.Copy(tarGzipFilePath, newRootfsPath, true);
 
             var launcherPsi = new ProcessStartInfo(newLauncherPath, "install")

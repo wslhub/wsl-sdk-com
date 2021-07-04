@@ -104,9 +104,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <Content Include="distrorun.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="distrorun.exe" />
     <Content Include="App.ico" />
     <Content Include="Install.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
