@@ -77,6 +77,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interop\ComIStreamWrapper.cs" />
     <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="Models\DistroFlags.cs" />
     <Compile Include="Models\DistroInfo.cs" />

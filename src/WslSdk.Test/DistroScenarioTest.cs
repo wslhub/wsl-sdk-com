@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
 namespace WslSdk.Test
@@ -13,6 +15,17 @@ namespace WslSdk.Test
             var wslServiceType = Type.GetTypeFromProgID("WslSdk.WslService");
             dynamic wslService = Activator.CreateInstance(wslServiceType);
             return wslService;
+        }
+
+        private dynamic OpenAdodbStreamForWrite(string outputFilePath)
+        {
+            var adodbType = Type.GetTypeFromProgID("ADODB.Stream");
+            dynamic adodbStream = Activator.CreateInstance(adodbType);
+            // adModeRead = 1, adModeWrite = 2
+            adodbStream.Type = 2;
+            adodbStream.Open();
+            adodbStream.LoadFromFile(outputFilePath);
+            return adodbStream;
         }
 
         private string GenerateRandomLatinText(int minWords = 10, int maxWords = 30,
@@ -137,6 +150,59 @@ namespace WslSdk.Test
                 if (tempFilePath != null && File.Exists(tempFilePath))
                 {
                     try { File.Delete(tempFilePath); }
+                    catch { }
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Test_StreamOutputTest()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+
+            var tempFileForStdout = Path.Combine(
+                Path.GetTempPath(),
+                Guid.NewGuid().ToString("n") + ".txt");
+
+            // ADODB Stream does not create a new file. We should create it first.
+            if (!File.Exists(tempFileForStdout))
+                File.WriteAllText(tempFileForStdout, string.Empty);
+
+            var tempFileForStderr = Path.Combine(
+                Path.GetTempPath(),
+                Guid.NewGuid().ToString("n") + ".txt");
+
+            // ADODB Stream does not create a new file. We should create it first.
+            if (!File.Exists(tempFileForStderr))
+                File.WriteAllText(tempFileForStderr, string.Empty);
+
+            IStream stdoutStream = null, stderrStream = null;
+
+            try
+            {
+                stdoutStream = (IStream)OpenAdodbStreamForWrite(tempFileForStdout);
+                stderrStream = (IStream)OpenAdodbStreamForWrite(tempFileForStderr);
+
+                var res = wslService.RunWslCommandWithStream(defaultDistroName, "curl --verbose https://www.naver.com/", null, stdoutStream, stderrStream);
+
+                Assert.IsNotNull(tempFileForStdout);
+                Assert.IsTrue(File.ReadAllText(tempFileForStdout).Length > 0);
+
+                Assert.IsNotNull(tempFileForStderr);
+                Assert.IsTrue(File.ReadAllText(tempFileForStderr).Length > 0);
+            }
+            finally
+            {
+                if (tempFileForStdout != null && File.Exists(tempFileForStdout))
+                {
+                    try { File.Delete(tempFileForStdout); }
+                    catch { }
+                }
+
+                if (tempFileForStderr != null && File.Exists(tempFileForStderr))
+                {
+                    try { File.Delete(tempFileForStderr); }
                     catch { }
                 }
             }

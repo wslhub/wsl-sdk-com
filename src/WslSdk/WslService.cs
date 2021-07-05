@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using WslSdk.Contracts;
 using WslSdk.Interop;
 using WslSdk.Models;
@@ -59,6 +61,23 @@ namespace WslSdk
             {
                 return WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, commandLine, false, stdin: inputStream);
             }
+        }
+
+        public int RunWslCommandWithStream(string distroName, string commandLine, IStream inputStream, IStream outputStream, IStream errorOutputStream)
+        {
+            var inputStreamWrapper = inputStream != null ? new ComIStreamWrapper(inputStream) : Stream.Null;
+            var outputStreamWrapper = outputStream != null ? new ComIStreamWrapper(outputStream) : Stream.Null;
+            var errorOutputStreamWrapper = errorOutputStream != null ? new ComIStreamWrapper(outputStream) : Stream.Null;
+
+            var resultCode = WslLauncher.RunWslCommandAsStream(WslNativeMethods.Api, distroName, commandLine, false,
+                stdin: inputStreamWrapper,
+                stdout: x => outputStreamWrapper.Write(x, 0, x.Length),
+                stderr: x => errorOutputStreamWrapper.Write(x, 0, x.Length));
+
+            if (resultCode.HasValue)
+                return resultCode.Value;
+            else
+                return int.MaxValue;
         }
 
         public DistroRegistryInfo GetDistroInfo(string distroName)
