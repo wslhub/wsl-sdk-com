@@ -1,17 +1,16 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("WslSdk")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Contains WSL automation related features")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("WSLHUB")]
 [assembly: AssemblyProduct("WslSdk")]
-[assembly: AssemblyCopyright("Copyright ©  2021")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright (c) 2021 rkttu.com, All rights reserved.")]
+[assembly: AssemblyTrademark("WslSdk")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
