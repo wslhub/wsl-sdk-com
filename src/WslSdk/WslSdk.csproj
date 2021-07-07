@@ -113,9 +113,6 @@
     <Content Include="Uninstall.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WslSdkServiceClient.ps1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="app.manifest" />
   </ItemGroup>
   <Import Project="..\WslSdk.Shared\WslSdk.Shared.projitems" Label="Shared" />
