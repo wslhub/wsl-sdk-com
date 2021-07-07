@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using WslSdk.Models;
 
 namespace WslSdk.Contracts
@@ -18,8 +17,6 @@ namespace WslSdk.Contracts
         string RunWslCommand(string distroName, string commandLine);
 
         string RunWslCommandWithInput(string distroName, string commandLine, string inputFilePath);
-
-        int RunWslCommandWithStream(string distroName, string commandLine, IStream inputStream, IStream outputStream, IStream errorOutputStream);
 
         DistroRegistryInfo GetDistroInfo(string distroName);
 

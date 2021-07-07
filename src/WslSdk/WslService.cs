@@ -63,23 +63,6 @@ namespace WslSdk
             }
         }
 
-        public int RunWslCommandWithStream(string distroName, string commandLine, IStream inputStream, IStream outputStream, IStream errorOutputStream)
-        {
-            var inputStreamWrapper = inputStream != null ? new ComIStreamWrapper(inputStream) : Stream.Null;
-            var outputStreamWrapper = outputStream != null ? new ComIStreamWrapper(outputStream) : Stream.Null;
-            var errorOutputStreamWrapper = errorOutputStream != null ? new ComIStreamWrapper(outputStream) : Stream.Null;
-
-            var resultCode = WslLauncher.RunWslCommandAsStream(WslNativeMethods.Api, distroName, commandLine, false,
-                stdin: inputStreamWrapper,
-                stdout: x => outputStreamWrapper.Write(x, 0, x.Length),
-                stderr: x => errorOutputStreamWrapper.Write(x, 0, x.Length));
-
-            if (resultCode.HasValue)
-                return resultCode.Value;
-            else
-                return int.MaxValue;
-        }
-
         public DistroRegistryInfo GetDistroInfo(string distroName)
         {
             return WslDistroManipulation.GetDistroFromRegistry(distroName);
