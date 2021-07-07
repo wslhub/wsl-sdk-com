@@ -1,5 +1,7 @@
 # Out-of-process COM server style WSL SDK
 
+![SDK Sample Application](assets/images/wslsdk-sample-winforms.png)
+
 This project contains the out-of-process style COM server-based WSL APIs, which overcome the CoInitializeSecurity issues and still maintain ease of code management with the .NET Framework.
 
 You can use this OOP-style COM server to query and run WSL commands via the Windows PowerShell, LINQPad, and all COM-supported clients. Once registered, every time you call the COM interface, the executable file automatically called and launched on-demand. If the reference count reaches zero, the process is automatically closed.
