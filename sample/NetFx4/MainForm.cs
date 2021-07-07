@@ -16,10 +16,11 @@ namespace WslSdk.Sample
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            if (backgroundWorker.IsBusy)
-                return;
+        }
 
-            backgroundWorker.RunWorkerAsync("ls /");
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            commandInput.Focus();
         }
 
         private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -54,7 +55,7 @@ namespace WslSdk.Sample
                 backgroundWorker.ReportProgress(90, $"Unregistering Busybox Distro: {randomName}");
                 wslService.UnregisterDistro(randomName);
 
-                backgroundWorker.ReportProgress(100, "Completed");
+                backgroundWorker.ReportProgress(100, $"Completed: {randomName}");
             }
         }
 
@@ -74,18 +75,46 @@ namespace WslSdk.Sample
                 res = actualException.ToString();
             }
             else
+            {
                 res = e.Result as string;
+                commandInput.AutoCompleteCustomSource.Add(commandInput.Text);
+            }
 
             if (string.IsNullOrWhiteSpace(res))
                 res = "(Result Unknown)";
 
             webBrowser.DocumentText = $"<pre>{WebUtility.HtmlEncode(res)}</pre>";
+            commandInput.Focus();
         }
 
         private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            statusLabel.Visible = (e.ProgressPercentage < 100);
+            progressBar.Visible = e.ProgressPercentage < 100;
+            progressBar.Value = Math.Max(0, Math.Min(100, e.ProgressPercentage));
             statusLabel.Text = $"Status: {e.UserState as string}";
+        }
+
+        private void commandInput_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (backgroundWorker.IsBusy)
+                {
+                    MessageBox.Show(this, "Background worker is busy.", Text, MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1);
+                    return;
+                }
+
+                var command = commandInput.Text;
+
+                if (string.IsNullOrWhiteSpace(command))
+                {
+                    MessageBox.Show(this, "Empty command string is not allowed.", Text, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    commandInput.Focus();
+                    return;
+                }
+
+                backgroundWorker.RunWorkerAsync(command);
+            }
         }
     }
 }

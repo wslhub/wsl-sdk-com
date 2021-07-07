@@ -30,8 +30,19 @@ namespace WslSdk.Sample
         private void InitializeComponent()
         {
             this.webBrowser = new System.Windows.Forms.WebBrowser();
-            this.statusLabel = new System.Windows.Forms.Label();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
+            this.toolStripContainer = new System.Windows.Forms.ToolStripContainer();
+            this.toolStrip = new System.Windows.Forms.ToolStrip();
+            this.commandInput = new WslSdk.Sample.ToolStripSpringTextBox();
+            this.statusStrip.SuspendLayout();
+            this.toolStripContainer.BottomToolStripPanel.SuspendLayout();
+            this.toolStripContainer.ContentPanel.SuspendLayout();
+            this.toolStripContainer.TopToolStripPanel.SuspendLayout();
+            this.toolStripContainer.SuspendLayout();
+            this.toolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // webBrowser
@@ -43,24 +54,10 @@ namespace WslSdk.Sample
             this.webBrowser.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser.Name = "webBrowser";
             this.webBrowser.ScriptErrorsSuppressed = true;
-            this.webBrowser.ScrollBarsEnabled = false;
-            this.webBrowser.Size = new System.Drawing.Size(800, 450);
-            this.webBrowser.TabIndex = 0;
+            this.webBrowser.Size = new System.Drawing.Size(800, 403);
+            this.webBrowser.TabIndex = 1;
             this.webBrowser.Url = new System.Uri("about:blank", System.UriKind.Absolute);
             this.webBrowser.WebBrowserShortcutsEnabled = false;
-            // 
-            // statusLabel
-            // 
-            this.statusLabel.AutoSize = true;
-            this.statusLabel.BackColor = System.Drawing.SystemColors.WindowText;
-            this.statusLabel.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusLabel.ForeColor = System.Drawing.SystemColors.Window;
-            this.statusLabel.Location = new System.Drawing.Point(0, 0);
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(140, 24);
-            this.statusLabel.TabIndex = 1;
-            this.statusLabel.Text = "Status: None";
-            this.statusLabel.Visible = false;
             // 
             // backgroundWorker
             // 
@@ -69,25 +66,111 @@ namespace WslSdk.Sample
             this.backgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker_ProgressChanged);
             this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_RunWorkerCompleted);
             // 
+            // statusStrip
+            // 
+            this.statusStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusLabel,
+            this.progressBar});
+            this.statusStrip.Location = new System.Drawing.Point(0, 0);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(800, 22);
+            this.statusStrip.TabIndex = 3;
+            this.statusStrip.Text = "statusStrip1";
+            // 
+            // statusLabel
+            // 
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(785, 17);
+            this.statusLabel.Spring = true;
+            this.statusLabel.Text = "Status";
+            this.statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // progressBar
+            // 
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(100, 16);
+            this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.progressBar.Visible = false;
+            // 
+            // toolStripContainer
+            // 
+            // 
+            // toolStripContainer.BottomToolStripPanel
+            // 
+            this.toolStripContainer.BottomToolStripPanel.Controls.Add(this.statusStrip);
+            // 
+            // toolStripContainer.ContentPanel
+            // 
+            this.toolStripContainer.ContentPanel.Controls.Add(this.webBrowser);
+            this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(800, 403);
+            this.toolStripContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStripContainer.Location = new System.Drawing.Point(0, 0);
+            this.toolStripContainer.Name = "toolStripContainer";
+            this.toolStripContainer.Size = new System.Drawing.Size(800, 450);
+            this.toolStripContainer.TabIndex = 4;
+            this.toolStripContainer.Text = "toolStripContainer";
+            // 
+            // toolStripContainer.TopToolStripPanel
+            // 
+            this.toolStripContainer.TopToolStripPanel.Controls.Add(this.toolStrip);
+            // 
+            // toolStrip
+            // 
+            this.toolStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.commandInput});
+            this.toolStrip.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip.Name = "toolStrip";
+            this.toolStrip.Size = new System.Drawing.Size(800, 25);
+            this.toolStrip.Stretch = true;
+            this.toolStrip.TabIndex = 0;
+            // 
+            // commandInput
+            // 
+            this.commandInput.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.commandInput.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.commandInput.Font = new System.Drawing.Font("Malgun Gothic", 9F);
+            this.commandInput.Name = "commandInput";
+            this.commandInput.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
+            this.commandInput.Size = new System.Drawing.Size(766, 25);
+            this.commandInput.KeyUp += new System.Windows.Forms.KeyEventHandler(this.commandInput_KeyUp);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.statusLabel);
-            this.Controls.Add(this.webBrowser);
+            this.Controls.Add(this.toolStripContainer);
             this.Name = "MainForm";
             this.Text = "WSL SDK Sample";
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Shown += new System.EventHandler(this.MainForm_Shown);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
+            this.toolStripContainer.BottomToolStripPanel.ResumeLayout(false);
+            this.toolStripContainer.BottomToolStripPanel.PerformLayout();
+            this.toolStripContainer.ContentPanel.ResumeLayout(false);
+            this.toolStripContainer.TopToolStripPanel.ResumeLayout(false);
+            this.toolStripContainer.TopToolStripPanel.PerformLayout();
+            this.toolStripContainer.ResumeLayout(false);
+            this.toolStripContainer.PerformLayout();
+            this.toolStrip.ResumeLayout(false);
+            this.toolStrip.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.WebBrowser webBrowser;
-        private System.Windows.Forms.Label statusLabel;
         private System.ComponentModel.BackgroundWorker backgroundWorker;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel statusLabel;
+        private System.Windows.Forms.ToolStripContainer toolStripContainer;
+        private System.Windows.Forms.ToolStrip toolStrip;
+        private ToolStripSpringTextBox commandInput;
+        private System.Windows.Forms.ToolStripProgressBar progressBar;
     }
 }
