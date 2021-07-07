@@ -35,6 +35,14 @@ You can use this OOP-style COM server to query and run WSL commands via the Wind
    ```
 1. If you uninstall the OOP COM server, call the `Uninstall.cmd` batch file via the elevated permission.
 
+## Code Samples
+
+- [Excel and Visual Basic for Application](sample/Excel/WslSdkSample.xlsb)
+- [Jupyter Notebook and Python 3.x](sample/JupyterNotebook/Sample.ipynb)
+- [Windows PowerShell 5.x](sample/PowerShell/Sample.ps1)
+- [LINQPAD 5](sample/LinqPad5/WslSdkSample.linq)
+- [.NET Framework 4.5](sample/NetFx4/)
+
 ## Some caveats
 
 - Due to the lack of official WSL COM interface specification, I currently made this SDK with the limited WSL Win32 APIs.
@@ -48,3 +56,7 @@ You can use this OOP-style COM server to query and run WSL commands via the Wind
 - Make v1 COM Interface documentation
 - Make viable code samples with multiple programming languages which support COM client (such as PowerShell, LINQPad 5+, Delphi, Python, etc.)
 - Add ARM64 Support
+
+## Open Source License Information
+
+This project uses the MIT license. Please refer [LICENSE.txt](LICENSE.txt).
