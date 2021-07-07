@@ -1,10 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 using WslSdk.Contracts;
 using WslSdk.Interop;
 using WslSdk.Models;
@@ -14,8 +13,9 @@ namespace WslSdk
 {
     [ComVisible(true)]
     [ProgId("WslSdk.WslService")]
+    [ClassInterface(ClassInterfaceType.None)]
     [Guid("1D0D99B6-AF95-4D3F-B55B-BA17CB2D549B")]
-    [ClassInterface(ClassInterfaceType.AutoDispatch)]
+    [ComSourceInterfaces(typeof(IWslServiceEvents))]
     public class WslService : IWslService
     {
         public WslService()
@@ -47,20 +47,48 @@ namespace WslSdk
 
         public string RunWslCommand(string distroName, string commandLine)
         {
-            return WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, commandLine, false);
+            var buffer = new StringBuilder();
+
+            using (var writer = new StringWriter(buffer))
+            {
+                WslLauncher.RunCommandAsString(
+                    WslNativeMethods.Api,
+                    distroName, commandLine, false,
+                    stdout: data => {
+                        StdoutDataReceived?.Invoke(data);
+                        writer.Write(data);
+                    },
+                    stderr: data => StderrDataReceived?.Invoke(data));
+                writer.Flush();
+            }
+
+            return buffer.ToString();
         }
 
         public string RunWslCommandWithInput(string distroName, string commandLine, string inputFilePath)
         {
             Stream inputStream = null;
+            var buffer = new StringBuilder();
 
             if (inputFilePath != null && File.Exists(inputFilePath))
                 inputStream = File.OpenRead(inputFilePath);
 
             using (inputStream)
+            using (var writer = new StringWriter(buffer))
             {
-                return WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, commandLine, false, stdin: inputStream);
+                WslLauncher.RunCommandAsString(
+                    WslNativeMethods.Api,
+                    distroName, commandLine, false,
+                    stdin: inputStream,
+                    stdout: data => {
+                        StdoutDataReceived?.Invoke(data);
+                        writer.Write(data);
+                    },
+                    stderr: data => StderrDataReceived?.Invoke(data));
+                writer.Flush();
             }
+
+            return buffer.ToString();
         }
 
         public DistroRegistryInfo GetDistroInfo(string distroName)
@@ -166,6 +194,16 @@ namespace WslSdk
             }
             catch { return false; }
         }
+
+        [ComVisible(false)]
+        public delegate void StdoutDataReceivedDelegate(string data);
+
+        public event StdoutDataReceivedDelegate StdoutDataReceived;
+
+        [ComVisible(false)]
+        public delegate void StderrDataReceivedDelegate(string data);
+
+        public event StderrDataReceivedDelegate StderrDataReceived;
 
         // These routines perform the additional COM registration needed by 
         // the service.
