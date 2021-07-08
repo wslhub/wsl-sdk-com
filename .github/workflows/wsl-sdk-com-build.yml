@@ -70,6 +70,8 @@ jobs:
     # Build the installer
     - name: Build the installer
       run: '& "${env:ProgramFiles(x86)}\NSIS\Bin\makensis.exe" /DBUILD_CONFIG=${env:Configuration} $env:NSIS_Script_Name'
+      env:
+        Configuration: ${{ matrix.configuration }}
 
     ## Remove the pfx
     #- name: Remove the pfx
