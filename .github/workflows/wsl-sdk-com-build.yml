@@ -18,6 +18,7 @@ jobs:
     env:
       Solution_Name: 'src\WslSdk.sln'
       Setup_Artifact_Name: 'src\WslSdkSetup.exe'
+      UnitTest_Dll_Name: 'src\WslSdk.Test\bin\x64\${{ matrix.configuration }}\WslSdk.Test.dll'
 
     steps:
     - name: Activate WSL Environment
@@ -42,6 +43,16 @@ jobs:
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
+    
+    # Build the application
+    - name: Build the application
+      run: msbuild $env:Solution_Name /t:Clean,Build /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+    
+    # Run unit test
+    - name: Run unit test
+      run: vstest.console /Platform:x64 /Framework:.NETFramework,Version=v4.7.2 $env:UnitTest_Dll_Name
 
     ## Decode the base 64 encoded pfx and save the Signing_Certificate
     #- name: Decode the pfx
