@@ -17,6 +17,7 @@ jobs:
 
     env:
       Solution_Name: 'src\WslSdk.sln'
+      UnitTest_Solution_Name: 'src\WslSdk.Test.sln'
       NSIS_Script_Name: 'src\WslSdkSetup.nsi'
       Setup_Artifact_Name: 'src\WslSdkSetup.exe'
 
@@ -64,7 +65,7 @@ jobs:
         
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test
+      run: dotnet test $env:UnitTest_Solution_Name
 
     ## Decode the base 64 encoded pfx and save the Signing_Certificate
     #- name: Decode the pfx
