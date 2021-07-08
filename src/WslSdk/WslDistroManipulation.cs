@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using WslSdk.Models;
 using WslSdk.Shared;
 
@@ -255,14 +255,19 @@ namespace WslSdk
             var process = new Process()
             {
                 StartInfo = launcherPsi,
-                EnableRaisingEvents = true,
             };
 
             process.Start();
-            process.WaitForExit();
 
-            if (process.ExitCode != 0)
-                throw new Exception($"Process exit code is non-zero: {process.ExitCode} - {process.StandardError.ReadToEnd()}");
+            for (int i = 0; i < 10; i++)
+            {
+                if (WslNativeMethods.Api.WslIsDistributionRegistered(distroName))
+                    return;
+
+                Thread.Sleep(TimeSpan.FromSeconds(1d));
+            }
+
+            throw new Exception($"Distro '{distroName}' registration failed.");
         }
 
         public static void UnregisterDistro(string distroName)
