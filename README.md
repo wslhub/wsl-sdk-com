@@ -42,7 +42,7 @@ You can use this OOP-style COM server to query and run WSL commands via the Wind
 - [Excel and Visual Basic for Application](sample/Excel/WslSdkSample.xlsb)
 - [Jupyter Notebook and Python 3.x](sample/JupyterNotebook/Sample.ipynb)
 - [Windows PowerShell 5.x](sample/PowerShell/Sample.ps1)
-- [LINQPAD 5](sample/LinqPad5/WslSdkSample.linq)
+- [LINQPAD 5](sample/LinqPad5/)
 - [.NET Framework 4.5](sample/NetFx4/)
 
 ## Some caveats
