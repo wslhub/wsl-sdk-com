@@ -46,7 +46,7 @@ jobs:
     
     # Build the application
     - name: Build the application
-      run: msbuild $env:Solution_Name /t:Clean,Build /p:Configuration=$env:Configuration
+      run: msbuild $env:Solution_Name /m /t:Build /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
     
