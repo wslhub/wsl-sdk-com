@@ -65,7 +65,7 @@ jobs:
         
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test $env:UnitTest_Solution_Name
+      run: dotnet -r win-x64 test $env:UnitTest_Solution_Name
 
     ## Decode the base 64 encoded pfx and save the Signing_Certificate
     #- name: Decode the pfx
