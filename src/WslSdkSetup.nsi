@@ -83,9 +83,9 @@ FunctionEnd
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  File "WslSdk\bin\x64\Release\WslSdk.pdb"
-  File "WslSdk\bin\x64\Release\WslSdk.exe.config"
-  File "WslSdk\bin\x64\Release\WslSdk.exe"
+  File "WslSdk\bin\x64\${BUILD_CONFIG}\WslSdk.pdb"
+  File "WslSdk\bin\x64\${BUILD_CONFIG}\WslSdk.exe.config"
+  File "WslSdk\bin\x64\${BUILD_CONFIG}\WslSdk.exe"
   File "Sample.ps1"
 SectionEnd
 
