@@ -1,0 +1,62 @@
+name: WSL COM SDK Build Pipeline
+
+on:
+  push:
+    branches: [ github-action-wip ]
+  pull_request:
+    branches: [ github-action-wip ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    # For a list of available runner types, refer to https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-2019
+
+    env:
+      Solution_Name: 'src\WslSdk.sln'
+      Setup_Artifact_Name: 'src\WslSdkSetup.exe'
+
+    steps:
+    - name: Activate WSL Environment
+      uses: Vampire/setup-wsl@v1
+
+    - name: Install development dependencies
+      uses: crazy-max/ghaction-chocolatey@v1
+      with:
+        args: install nsis -y
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Add MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    # Restore the application to populate the obj folder
+    - name: Restore the application
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    ## Decode the base 64 encoded pfx and save the Signing_Certificate
+    #- name: Decode the pfx
+    #  run: |
+    #    $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
+    #    $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath GitHubActionsWorkflow.pfx
+    #    [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+
+    ## Remove the pfx
+    #- name: Remove the pfx
+    #  run: Remove-Item -path $env:Wap_Project_Directory\$env:Signing_Certificate
+
+    ## Upload the MSIX package: https://github.com/marketplace/actions/upload-artifact
+    #- name: Upload build artifacts
+    #  uses: actions/upload-artifact@v2
+    #  with:
+    #    name: WSL SDK Installer
+    #    path: ${{ env.Setup_Artifact_Name }}
