@@ -147,7 +147,7 @@ namespace WslSdk
                 distroName,
                 "/bin/wslpath", "/usr/bin/wslpath");
             
-            var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}", false);
+            var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -w {linuxAbsolutePath}", false);
 
             if (response == null)
                 throw new Exception("Cannot run wslpath executable.");
@@ -163,7 +163,7 @@ namespace WslSdk
                 distroName,
                 "/bin/wslpath", "/usr/bin/wslpath");
 
-            var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -a -u {windowsAbsolutePath}", false);
+            var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -u {windowsAbsolutePath}", false);
 
             if (response == null)
                 throw new Exception("Cannot run wslpath executable.");
@@ -181,7 +181,7 @@ namespace WslSdk
                     distroName,
                     "/bin/wslpath", "/usr/bin/wslpath");
 
-                var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -a -w {linuxAbsolutePath}", false);
+                var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -w {linuxAbsolutePath}", false);
 
                 if (response == null)
                     throw new Exception("Cannot run wslpath executable.");
