@@ -125,6 +125,7 @@ jobs:
     env:
       Build_Artifact_Directory: 'src\WslSdk\bin\x64\${{ matrix.configuration }}\'
       NSIS_Script_Name: 'src\WslSdkSetup.nsi'
+      Installer_Artifact_Directory: 'src\'
       Setup_Artifact_Name: 'src\WslSdkSetup.exe'
     
     steps:
@@ -158,8 +159,8 @@ jobs:
       uses: markeytos/code-sign-action@v1
       with:
         certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
-        folder: '${{ env.Setup_Artifact_Name }}'
-        recursive: true
+        folder: '${{ env.Installer_Artifact_Directory }}'
+        recursive: false
     
     # Upload the setup file: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
