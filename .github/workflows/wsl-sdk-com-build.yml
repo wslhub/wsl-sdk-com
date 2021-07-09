@@ -2,9 +2,9 @@ name: WSL COM SDK Build Pipeline
 
 on:
   push:
-    branches: [ github-action-wip ]
+    branches: [ main ]
   pull_request:
-    branches: [ github-action-wip ]
+    branches: [ main ]
 
 jobs:
   build:
