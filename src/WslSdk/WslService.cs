@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -144,13 +143,11 @@ namespace WslSdk
 
         public AccountInfo[] GetAccountInfoList(string distroName)
         {
-            var etcPasswdFilePath = Path.Combine("\\\\wsl$", distroName, "etc", "passwd");
-            var results = new List<AccountInfo>();
+            var content = WslLauncher.GetCommandStdoutAsString(
+                WslNativeMethods.Api, distroName, "cat /etc/passwd", false);
 
-            if (!File.Exists(etcPasswdFilePath))
-                return results.ToArray();
-
-            var list = File.ReadAllLines(etcPasswdFilePath, Encoding.ASCII)
+            var list = content
+                .Split(new char[] { '\r', '\n', }, StringSplitOptions.RemoveEmptyEntries)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => new
                 {
@@ -199,19 +196,16 @@ namespace WslSdk
                     };
                 });
 
-            results.AddRange(list);
-            return results.ToArray();
+            return list.ToArray();
         }
 
         public GroupInfo[] GetGroupInfoList(string distroName)
         {
-            var etcGroupFilePath = Path.Combine("\\\\wsl$", distroName, "etc", "group");
-            var results = new List<GroupInfo>();
+            var content = WslLauncher.GetCommandStdoutAsString(
+                WslNativeMethods.Api, distroName, "cat /etc/group", false);
 
-            if (!File.Exists(etcGroupFilePath))
-                return results.ToArray();
-
-            var list = File.ReadAllLines(etcGroupFilePath, Encoding.ASCII)
+            var list = content
+                .Split(new char[] { '\r', '\n', }, StringSplitOptions.RemoveEmptyEntries)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => new
                 {
@@ -243,8 +237,7 @@ namespace WslSdk
                     };
                 });
 
-            results.AddRange(list);
-            return results.ToArray();
+            return list.ToArray();
         }
 
         [ComVisible(false)]
