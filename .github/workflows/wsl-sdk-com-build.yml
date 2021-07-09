@@ -41,18 +41,21 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
     
-    ## Decode the base 64 encoded pfx and save the Signing_Certificate
-    #- name: Decode the pfx
-    #  run: |
-    #    $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
-    #    $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath GitHubActionsWorkflow.pfx
-    #    [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+    # Decode the base 64 encoded pfx and save the Signing_Certificate
+    - name: Decode the pfx
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
+        $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath GitHubActionsWorkflow.pfx
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
     
-    # TODO: Add code-sign to each executable file.
+    # Add code-sign to each executable file.
+    - name: Perform Code sign
+      run: |
+        signtool.exe sign /v /f "$certificatePath" /t http://timestamp.comodoca.com/authenticode "${env:Build_Artifact_Directory}\WslSdk.exe"
     
-    ## Remove the pfx
-    #- name: Remove the pfx
-    #  run: Remove-Item -path $env:Wap_Project_Directory\$env:Signing_Certificate
+    # Remove the pfx
+    - name: Remove the pfx
+      run: Remove-Item -path $env:Wap_Project_Directory\$env:Signing_Certificate
     
     # Upload the build artifacts for other jobs: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
@@ -152,24 +155,27 @@ jobs:
         name: 'Build Output (${{ matrix.configuration }})'
         path: '${{ env.Build_Artifact_Directory }}'
         
-    ## Decode the base 64 encoded pfx and save the Signing_Certificate
-    #- name: Decode the pfx
-    #  run: |
-    #    $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
-    #    $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath GitHubActionsWorkflow.pfx
-    #    [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-
     # Build the installer
     - name: Build the installer
       run: '& "${env:ProgramFiles(x86)}\NSIS\Bin\makensis.exe" /DBUILD_CONFIG=${env:Configuration} $env:NSIS_Script_Name'
       env:
         Configuration: ${{ matrix.configuration }}
-        
-    # TODO: Add code-sign to each executable file.
 
-    ## Remove the pfx
-    #- name: Remove the pfx
-    #  run: Remove-Item -path $env:Wap_Project_Directory\$env:Signing_Certificate
+    # Decode the base 64 encoded pfx and save the Signing_Certificate
+    - name: Decode the pfx
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
+        $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath GitHubActionsWorkflow.pfx
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+
+    # Add code-sign to each executable file.
+    - name: Perform Code sign
+      run: |
+        signtool.exe sign /v /f "$certificatePath" /t http://timestamp.comodoca.com/authenticode "${env:Setup_Artifact_Name}"
+
+    # Remove the pfx
+    - name: Remove the pfx
+      run: Remove-Item -path $env:Wap_Project_Directory\$env:Signing_Certificate
     
     # Upload the setup file: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
