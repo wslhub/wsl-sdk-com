@@ -77,5 +77,47 @@ namespace WslSdk.Test
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Length > 0);
         }
+
+        [TestMethod]
+        public void Test_QueryAccountInfoList()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            var res = wslService.GetAccountInfoList(defaultDistroName);
+
+            for (int i = 0; i < res.Length; i++)
+            {
+                dynamic eachUserInfo = res[i];
+                Assert.IsNotNull(eachUserInfo.RawData);
+                Assert.IsTrue(eachUserInfo.RawData.Length > 0);
+
+                Assert.IsNotNull(eachUserInfo.Username);
+                Assert.IsTrue(eachUserInfo.Username.Length > 0);
+            }
+
+            Assert.IsNotNull(res);
+            Assert.IsTrue(res.Length > 0);
+        }
+
+        [TestMethod]
+        public void Test_QueryGroupInfoList()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            var res = wslService.GetGroupInfoList(defaultDistroName);
+
+            for (int i = 0; i < res.Length; i++)
+            {
+                dynamic eachUserInfo = res[i];
+                Assert.IsNotNull(eachUserInfo.RawData);
+                Assert.IsTrue(eachUserInfo.RawData.Length > 0);
+
+                Assert.IsNotNull(eachUserInfo.GroupName);
+                Assert.IsTrue(eachUserInfo.GroupName.Length > 0);
+            }
+
+            Assert.IsNotNull(res);
+            Assert.IsTrue(res.Length > 0);
+        }
     }
 }

@@ -79,9 +79,11 @@
   <ItemGroup>
     <Compile Include="Contracts\IWslServiceEvents.cs" />
     <Compile Include="Interop\NativeMethods.cs" />
+    <Compile Include="Models\AccountInfo.cs" />
     <Compile Include="Models\DistroFlags.cs" />
     <Compile Include="Models\DistroInfo.cs" />
     <Compile Include="Models\DistroRegistryInfo.cs" />
+    <Compile Include="Models\GroupInfo.cs" />
     <Compile Include="NamesGenerator.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

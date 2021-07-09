@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -139,6 +140,111 @@ namespace WslSdk
                 return null;
 
             return targetDirectoryPath;
+        }
+
+        public AccountInfo[] GetAccountInfoList(string distroName)
+        {
+            var etcPasswdFilePath = Path.Combine("\\\\wsl$", distroName, "etc", "passwd");
+            var results = new List<AccountInfo>();
+
+            if (!File.Exists(etcPasswdFilePath))
+                return results.ToArray();
+
+            var list = File.ReadAllLines(etcPasswdFilePath, Encoding.ASCII)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => new
+                {
+                    Raw = x,
+                    Parts = x.Split(new char[] { ':', }, StringSplitOptions.None),
+                })
+                .Where(x => x.Parts.Length == 7)
+                .Select(x =>
+                {
+                    var parts = x.Parts;
+                    var userName = parts.ElementAtOrDefault(0);
+                    var password = parts.ElementAtOrDefault(1);
+                    var userIdRaw = parts.ElementAtOrDefault(2);
+                    var groupIdRaw = parts.ElementAtOrDefault(3);
+                    var userIdInfo = parts.ElementAtOrDefault(4);
+                    var homeDirectoryPath = parts.ElementAtOrDefault(5);
+                    var assignedShellPath = parts.ElementAtOrDefault(6);
+
+                    var gecosParts = userIdInfo.Split(new char[] { ',', }, StringSplitOptions.None);
+                    var userFullName = gecosParts.ElementAtOrDefault(0) ?? string.Empty;
+                    var contactInfo = gecosParts.ElementAtOrDefault(1) ?? string.Empty;
+                    var officePhoneNo = gecosParts.ElementAtOrDefault(2) ?? string.Empty;
+                    var homePhoneNo = gecosParts.ElementAtOrDefault(3) ?? string.Empty;
+                    var miscInfo = gecosParts.Skip(4).Select(y => y ?? string.Empty).ToArray();
+
+                    var userId = int.Parse(userIdRaw);
+                    var groupId = int.Parse(groupIdRaw);
+
+                    return new AccountInfo
+                    {
+                        RawData = x.Raw,
+
+                        Username = userName,
+                        Password = password,
+                        UserId = userId,
+                        GroupId = groupId,
+                        UserIdInfo = userIdInfo,
+                        HomeDirectoryPath = homeDirectoryPath,
+                        AssignedShellPath = assignedShellPath,
+
+                        UserFullName = userFullName,
+                        ContactInfo = contactInfo,
+                        OfficePhoneNo = officePhoneNo,
+                        HomePhoneNo = homePhoneNo,
+                        MiscInfo = miscInfo,
+                    };
+                });
+
+            results.AddRange(list);
+            return results.ToArray();
+        }
+
+        public GroupInfo[] GetGroupInfoList(string distroName)
+        {
+            var etcGroupFilePath = Path.Combine("\\\\wsl$", distroName, "etc", "group");
+            var results = new List<GroupInfo>();
+
+            if (!File.Exists(etcGroupFilePath))
+                return results.ToArray();
+
+            var list = File.ReadAllLines(etcGroupFilePath, Encoding.ASCII)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => new
+                {
+                    Raw = x,
+                    Parts = x.Split(new char[] { ':', }, StringSplitOptions.None),
+                })
+                .Where(x => x.Parts.Length == 4)
+                .Select(x =>
+                {
+                    var parts = x.Parts;
+
+                    var groupName = parts.ElementAtOrDefault(0);
+                    var password = parts.ElementAtOrDefault(1);
+                    var groupIdRaw = parts.ElementAtOrDefault(2);
+                    var groupListRaw = parts.ElementAtOrDefault(3);
+
+                    var groupId = int.Parse(groupIdRaw);
+
+                    return new GroupInfo
+                    {
+                        RawData = x.Raw,
+
+                        GroupName = groupName,
+                        Password = password,
+                        GroupId = groupId,
+                        GroupUserList = groupListRaw,
+
+                        GroupUserNames = groupListRaw.Split(new char[] { ',', }, StringSplitOptions.RemoveEmptyEntries).ToArray(),
+                    };
+                });
+
+            results.AddRange(list);
+            return results.ToArray();
         }
 
         [ComVisible(false)]

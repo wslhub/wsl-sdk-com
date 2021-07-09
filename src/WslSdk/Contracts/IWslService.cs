@@ -35,5 +35,9 @@ namespace WslSdk.Contracts
         void UnregisterDistro(string existingDistroName);
 
         string GetWslWindowsPath(string distroName);
+
+        AccountInfo[] GetAccountInfoList(string distroName);
+
+        GroupInfo[] GetGroupInfoList(string distroName);
     }
 }
