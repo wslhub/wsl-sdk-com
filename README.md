@@ -51,14 +51,11 @@ You can use this OOP-style COM server to query and run WSL commands via the Wind
 
 - Due to the lack of official WSL COM interface specification, I currently made this SDK with the limited WSL Win32 APIs.
 - Due to the lack of a full COM integration feature, I do not choose the .NET Core and .NET 5+ to develop this SDK. Currently, .NET Core and .NET 5+ makes it very complicated to build an OOP COM server. However, if there are any improvements, I'll try migrating to .NET Core or .NET 5+ runtime.
-- I made this project a console application, not a no-window GUI application, for explicit notification and ease of debugging.
 - I tried to make this OOP COM server a registration-free module but failed. If anyone contributes to this enhancement, it makes even more flexibility to use this SDK.
 
 ## Things-to-do
 
-- Finalize v1 COM Interface
 - Make v1 COM Interface documentation
-- Make viable code samples with multiple programming languages which support COM client (such as PowerShell, LINQPad 5+, Delphi, Python, etc.)
 - Add ARM64 Support
 
 ## Open Source License Information
