@@ -31,7 +31,7 @@ jobs:
 
     # Restore the application to populate the obj folder
     - name: Restore the application
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+      run: msbuild $env:Solution_Name /m /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
     
@@ -97,16 +97,16 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
-
     # Install the .NET workload
     - name: Install .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-        
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+
     # Execute all unit tests in the solution
     - name: Execute unit tests
       run: dotnet test -r win-x64 $env:UnitTest_Solution_Name
@@ -158,7 +158,7 @@ jobs:
       uses: markeytos/code-sign-action@v1
       with:
         certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
-        folder: '${{ env.Build_Artifact_Directory }}'
+        folder: '${{ env.Setup_Artifact_Name }}'
         recursive: true
     
     # Upload the setup file: https://github.com/marketplace/actions/upload-artifact
