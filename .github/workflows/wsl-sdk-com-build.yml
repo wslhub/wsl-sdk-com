@@ -86,6 +86,8 @@ jobs:
     # Activate WSL Environment
     - name: Activate WSL Environment
       uses: Vampire/setup-wsl@v1
+      with:
+        distribution: Ubuntu-20.04
     
     # Download build artifacts
     - name: Download build artifacts
