@@ -243,7 +243,7 @@ namespace WslSdk
 
             File.Copy(tarGzipFilePath, newRootfsPath, true);
 
-            var launcherPsi = new ProcessStartInfo(newLauncherPath, "install")
+            var launcherPsi = new ProcessStartInfo(newLauncherPath, "install --root")
             {
                 CreateNoWindow = true,
                 RedirectStandardError = true,
