@@ -29,9 +29,13 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
 
+    # Setup nuget.exe
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.5
+
     # Restore the application to populate the obj folder
     - name: Restore the application
-      run: msbuild $env:Solution_Name /m /t:Restore /p:Configuration=$env:Configuration
+      run: nuget restore $env:Solution_Name
       env:
         Configuration: ${{ matrix.configuration }}
     
