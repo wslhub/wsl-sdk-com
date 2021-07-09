@@ -46,11 +46,7 @@ jobs:
       uses: markeytos/code-sign-action@v1
       with:
         certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
-        password: '${{ secrets.PFX_PASSWORD }}'
-        certificatesha1: '${{ secrets.PFX_CERTHASH }}'
-        #certificatename: '${{ secrets.PFX_CERTNAME }}'
         folder: '${{ env.Build_Artifact_Directory }}'
-        timestampUrl: 'http://timestamp.comodoca.com/authenticode'
         recursive: true
     
     # Upload the build artifacts for other jobs: https://github.com/marketplace/actions/upload-artifact
@@ -162,11 +158,7 @@ jobs:
       uses: markeytos/code-sign-action@v1
       with:
         certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
-        password: '${{ secrets.PFX_PASSWORD }}'
-        certificatesha1: '${{ secrets.PFX_CERTHASH }}'
-        #certificatename: '${{ secrets.PFX_CERTNAME }}'
         folder: '${{ env.Build_Artifact_Directory }}'
-        timestampUrl: 'http://timestamp.comodoca.com/authenticode'
         recursive: true
     
     # Upload the setup file: https://github.com/marketplace/actions/upload-artifact
