@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IniParser;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -238,6 +239,72 @@ namespace WslSdk
                 });
 
             return list.ToArray();
+        }
+
+        public AutoMountSettings GetAutoMountSettings(string distroName)
+        {
+            var memStream = new MemoryStream();
+            WslLauncher.RunWslCommandAsStream(
+                WslNativeMethods.Api, distroName, "cat /etc/wsl.conf", false,
+                stdout: data => memStream.Write(data, 0, data.Length));
+            memStream.Seek(0L, SeekOrigin.Begin);
+
+            using (var streamReader = new StreamReader(memStream, new UTF8Encoding(false)))
+            {
+                var iniParser = new StreamIniDataParser();
+                var data = iniParser.ReadData(streamReader);
+
+                if (!data.Sections.ContainsSection("automount"))
+                    return null;
+
+                var autoMountSection = data.Sections.GetSectionData("automount");
+
+                var settings = new AutoMountSettings();
+
+                if (autoMountSection.Keys.ContainsKey("enabled"))
+                    settings.Enabled = Convert.ToBoolean(autoMountSection.Keys.GetKeyData("enabled").Value);
+
+                if (autoMountSection.Keys.ContainsKey("root"))
+                    settings.Root = autoMountSection.Keys.GetKeyData("root").Value;
+
+                if (autoMountSection.Keys.ContainsKey("options"))
+                    settings.Options = autoMountSection.Keys.GetKeyData("options").Value;
+
+                if (autoMountSection.Keys.ContainsKey("mountFsTab"))
+                    settings.MountFileSystemTab = Convert.ToBoolean(autoMountSection.Keys.GetKeyData("mountFsTab").Value);
+
+                return settings;
+            }
+        }
+
+        public NetworkSettings GetNetworkSettings(string distroName)
+        {
+            var memStream = new MemoryStream();
+            WslLauncher.RunWslCommandAsStream(
+                WslNativeMethods.Api, distroName, "cat /etc/wsl.conf", false,
+                stdout: data => memStream.Write(data, 0, data.Length));
+            memStream.Seek(0L, SeekOrigin.Begin);
+
+            using (var streamReader = new StreamReader(memStream, new UTF8Encoding(false)))
+            {
+                var iniParser = new StreamIniDataParser();
+                var data = iniParser.ReadData(streamReader);
+
+                if (!data.Sections.ContainsSection("network"))
+                    return null;
+
+                var networkSection = data.Sections.GetSectionData("network");
+
+                var settings = new NetworkSettings();
+
+                if (networkSection.Keys.ContainsKey("generateHosts"))
+                    settings.GenerateHosts = Convert.ToBoolean(networkSection.Keys.GetKeyData("generateHosts").Value);
+
+                if (networkSection.Keys.ContainsKey("generateResolvConf"))
+                    settings.GenerateResolvConf = Convert.ToBoolean(networkSection.Keys.GetKeyData("generateResolvConf").Value);
+
+                return settings;
+            }
         }
 
         [ComVisible(false)]

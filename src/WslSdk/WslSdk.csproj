@@ -70,6 +70,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
+      <HintPath>..\packages\ini-parser.2.5.2\lib\net20\INIFileParser.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -80,10 +83,12 @@
     <Compile Include="Contracts\IWslServiceEvents.cs" />
     <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="Models\AccountInfo.cs" />
+    <Compile Include="Models\AutoMountSettings.cs" />
     <Compile Include="Models\DistroFlags.cs" />
     <Compile Include="Models\DistroInfo.cs" />
     <Compile Include="Models\DistroRegistryInfo.cs" />
     <Compile Include="Models\GroupInfo.cs" />
+    <Compile Include="Models\NetworkSettings.cs" />
     <Compile Include="NamesGenerator.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -116,6 +121,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="app.manifest" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\WslSdk.Shared\WslSdk.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

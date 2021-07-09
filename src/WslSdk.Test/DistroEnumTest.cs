@@ -119,5 +119,21 @@ namespace WslSdk.Test
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Length > 0);
         }
+
+        [TestMethod]
+        public void Test_AutoMountConfig()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            wslService.GetAutoMountSettings(defaultDistroName);
+        }
+
+        [TestMethod]
+        public void Test_NetworkConfig()
+        {
+            dynamic wslService = ActivateWslService();
+            var defaultDistroName = wslService.GetDefaultDistroName();
+            wslService.GetNetworkSettings(defaultDistroName);
+        }
     }
 }

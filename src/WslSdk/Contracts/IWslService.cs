@@ -39,5 +39,9 @@ namespace WslSdk.Contracts
         AccountInfo[] GetAccountInfoList(string distroName);
 
         GroupInfo[] GetGroupInfoList(string distroName);
+
+        AutoMountSettings GetAutoMountSettings(string distroName);
+
+        NetworkSettings GetNetworkSettings(string distroName);
     }
 }

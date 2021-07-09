@@ -86,6 +86,8 @@ Section "MainSection" SEC01
   File "WslSdk\bin\x64\${BUILD_CONFIG}\WslSdk.pdb"
   File "WslSdk\bin\x64\${BUILD_CONFIG}\WslSdk.exe.config"
   File "WslSdk\bin\x64\${BUILD_CONFIG}\WslSdk.exe"
+  File "WslSdk\bin\x64\${BUILD_CONFIG}\INIFileParser.dll"
+  File "WslSdk\bin\x64\${BUILD_CONFIG}\INIFileParser.xml"
   File "Sample.ps1"
 SectionEnd
 
@@ -125,6 +127,8 @@ Section Uninstall
   Delete "$INSTDIR\WslSdk.exe"
   Delete "$INSTDIR\WslSdk.exe.config"
   Delete "$INSTDIR\WslSdk.pdb"
+  Delete "$INSTDIR\INIFileParser.dll"
+  Delete "$INSTDIR\INIFileParser.xml"
   Delete "$INSTDIR\Sample.ps1"
 
   RMDir "$INSTDIR"
