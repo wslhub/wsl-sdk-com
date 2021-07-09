@@ -141,60 +141,6 @@ namespace WslSdk
             return targetDirectoryPath;
         }
 
-        public string TranslateToWindowsPath(string distroName, string linuxAbsolutePath)
-        {
-            var wslpathBinPath = Helpers.FindExistingPath(
-                distroName,
-                "/bin/wslpath", "/usr/bin/wslpath");
-            
-            var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -w {linuxAbsolutePath}", false);
-
-            if (response == null)
-                throw new Exception("Cannot run wslpath executable.");
-
-            return response.Split(
-                new char[] { '\n' },
-                StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-        }
-
-        public string TranslateToLinuxPath(string distroName, string windowsAbsolutePath)
-        {
-            var wslpathBinPath = Helpers.FindExistingPath(
-                distroName,
-                "/bin/wslpath", "/usr/bin/wslpath");
-
-            var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -u {windowsAbsolutePath}", false);
-
-            if (response == null)
-                throw new Exception("Cannot run wslpath executable.");
-
-            return response.Split(
-                new char[] { '\n' },
-                StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-        }
-
-        public bool TestLinuxPath(string distroName, string linuxAbsolutePath)
-        {
-            try
-            {
-                var wslpathBinPath = Helpers.FindExistingPath(
-                    distroName,
-                    "/bin/wslpath", "/usr/bin/wslpath");
-
-                var response = WslLauncher.GetCommandStdoutAsString(WslNativeMethods.Api, distroName, $"{wslpathBinPath} -w {linuxAbsolutePath}", false);
-
-                if (response == null)
-                    throw new Exception("Cannot run wslpath executable.");
-
-                var firstLine = response.Split(
-                    new char[] { '\n' },
-                    StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-
-                return Directory.Exists(firstLine) || File.Exists(firstLine);
-            }
-            catch { return false; }
-        }
-
         [ComVisible(false)]
         public delegate void StdoutDataReceivedDelegate(string data);
 
