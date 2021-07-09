@@ -35,11 +35,5 @@ namespace WslSdk.Contracts
         void UnregisterDistro(string existingDistroName);
 
         string GetWslWindowsPath(string distroName);
-
-        string TranslateToWindowsPath(string distroName, string linuxAbsolutePath);
-
-        string TranslateToLinuxPath(string distroName, string windowsAbsolutePath);
-
-        bool TestLinuxPath(string distroName, string linuxAbsolutePath);
     }
 }

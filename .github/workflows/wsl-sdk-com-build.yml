@@ -1,0 +1,170 @@
+name: WSL COM SDK Build Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    # For a list of available runner types, refer to https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-2019
+
+    env:
+      Solution_Name: 'src\WslSdk.sln'
+      Build_Artifact_Directory: 'src\WslSdk\bin\x64\${{ matrix.configuration }}\'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    # Restore the application to populate the obj folder
+    - name: Restore the application
+      run: msbuild $env:Solution_Name /m /t:Restore /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+    
+    # Build the application
+    - name: Build the application
+      run: msbuild $env:Solution_Name /m /t:Build /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+    
+    # Codesign
+    - name: Codesign
+      uses: markeytos/code-sign-action@v1
+      with:
+        certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
+        folder: '${{ env.Build_Artifact_Directory }}'
+        recursive: true
+    
+    # Upload the build artifacts for other jobs: https://github.com/marketplace/actions/upload-artifact
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'Build Output (${{ matrix.configuration }})'
+        path: ${{ env.Build_Artifact_Directory }}
+
+
+  test:
+    needs: build
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    # For a list of available runner types, refer to https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-2019
+    
+    env:
+      Build_Artifact_Directory: 'src\WslSdk\bin\x64\${{ matrix.configuration }}\'
+      UnitTest_Solution_Name: 'src\WslSdk.Test.sln'
+    
+    steps:
+    # Checkout Source Code
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    
+    # Activate WSL Environment
+    - name: Activate WSL Environment
+      uses: Vampire/setup-wsl@v1
+      with:
+        distribution: Ubuntu-20.04
+    
+    # Download build artifacts
+    - name: Download build artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: 'Build Output (${{ matrix.configuration }})'
+        path: '${{ env.Build_Artifact_Directory }}'
+
+    # Install COM Server
+    - name: Install COM Server
+      run: '& "${env:WINDIR}\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe" ${{ env.Build_Artifact_Directory }}\WslSdk.exe'
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    # Install the .NET workload
+    - name: Install .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    # Execute all unit tests in the solution
+    - name: Execute unit tests
+      run: dotnet test -r win-x64 $env:UnitTest_Solution_Name
+
+
+  publish:
+    needs: test
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+      
+    # For a list of available runner types, refer to https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-2019
+    
+    env:
+      Build_Artifact_Directory: 'src\WslSdk\bin\x64\${{ matrix.configuration }}\'
+      NSIS_Script_Name: 'src\WslSdkSetup.nsi'
+      Installer_Artifact_Directory: 'src\'
+      Setup_Artifact_Name: 'src\WslSdkSetup.exe'
+    
+    steps:
+    # Checkout Source Code
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Install NSIS Compiler
+    - name: Install development dependencies
+      uses: crazy-max/ghaction-chocolatey@v1
+      with:
+        args: install nsis -y
+        
+    # Download build artifacts
+    - name: Download build artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: 'Build Output (${{ matrix.configuration }})'
+        path: '${{ env.Build_Artifact_Directory }}'
+        
+    # Build the installer
+    - name: Build the installer
+      run: '& "${env:ProgramFiles(x86)}\NSIS\Bin\makensis.exe" /DBUILD_CONFIG=${env:Configuration} $env:NSIS_Script_Name'
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    # Codesign
+    - name: Codesign
+      uses: markeytos/code-sign-action@v1
+      with:
+        certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
+        folder: '${{ env.Installer_Artifact_Directory }}'
+        recursive: false
+    
+    # Upload the setup file: https://github.com/marketplace/actions/upload-artifact
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'WSL SDK Installer (${{ matrix.configuration }})'
+        path: ${{ env.Setup_Artifact_Name }}

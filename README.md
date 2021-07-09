@@ -1,5 +1,7 @@
 # Out-of-process COM server style WSL SDK
 
+[![WSL COM SDK Build Pipeline](https://github.com/wslhub/wsl-sdk-com/actions/workflows/wsl-sdk-com-build.yml/badge.svg)](https://github.com/wslhub/wsl-sdk-com/actions/workflows/wsl-sdk-com-build.yml)
+
 ![SDK Sample Application](assets/images/wslsdk-sample-winforms-2.png)
 
 This project contains the out-of-process style COM server-based WSL APIs, which overcome the CoInitializeSecurity issues and still maintain ease of code management with the .NET Framework.
