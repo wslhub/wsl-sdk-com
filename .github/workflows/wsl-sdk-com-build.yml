@@ -41,21 +41,16 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
     
-    # Decode the base 64 encoded pfx and save the Signing_Certificate
-    - name: Decode the pfx
-      run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
-        $certificatePath = Join-Path -Path $env:Build_Artifact_Directory -ChildPath GitHubActionsWorkflow.pfx
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-    
-    # Add code-sign to each executable file.
-    - name: Perform Code sign
-      run: |
-        signtool.exe sign /v /f "$certificatePath" /t http://timestamp.comodoca.com/authenticode "${env:Build_Artifact_Directory}\WslSdk.exe"
-    
-    # Remove the pfx
-    - name: Remove the pfx
-      run: Remove-Item -path $certificatePath
+    # Codesign
+    - name: Codesign
+      uses: DanaBear/code-sign-action@v4
+      with:
+        certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
+        password: '${{ secrets.PFX_PASSWORD }}'
+        certificatesha1: '${{ secrets.PFX_CERTHASH }}'
+        #certificatename: '${{ secrets.PFX_CERTNAME }}'
+        folder: '${{ env.Build_Artifact_Directory }}'
+        recursive: true
     
     # Upload the build artifacts for other jobs: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
@@ -161,21 +156,16 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
 
-    # Decode the base 64 encoded pfx and save the Signing_Certificate
-    - name: Decode the pfx
-      run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
-        $certificatePath = Join-Path -Path $env:Build_Artifact_Directory -ChildPath GitHubActionsWorkflow.pfx
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-
-    # Add code-sign to each executable file.
-    - name: Perform Code sign
-      run: |
-        signtool.exe sign /v /f "$certificatePath" /t http://timestamp.comodoca.com/authenticode "${env:Setup_Artifact_Name}"
-
-    # Remove the pfx
-    - name: Remove the pfx
-      run: Remove-Item -path $certificatePath
+    # Codesign
+    - name: Codesign
+      uses: DanaBear/code-sign-action@v4
+      with:
+        certificate: '${{ secrets.BASE64_ENCODED_PFX }}'
+        password: '${{ secrets.PFX_PASSWORD }}'
+        certificatesha1: '${{ secrets.PFX_CERTHASH }}'
+        #certificatename: '${{ secrets.PFX_CERTNAME }}'
+        folder: '${{ env.Build_Artifact_Directory }}'
+        recursive: true
     
     # Upload the setup file: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
