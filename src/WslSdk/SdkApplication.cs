@@ -4,6 +4,8 @@ using System.Threading;
 using System.Windows.Forms;
 using WslSdk.Interop;
 
+using Timer = System.Threading.Timer;
+
 namespace WslSdk
 {
     internal sealed class SdkApplication
@@ -37,7 +39,7 @@ namespace WslSdk
             };
         }
 
-        private static SdkApplication _instance = new SdkApplication();
+        private static readonly SdkApplication _instance = new SdkApplication();
 
         public static SdkApplication Instance
         {
@@ -45,7 +47,7 @@ namespace WslSdk
         }
 
         // For thread-sync in lock
-        private object syncRoot = new object();
+        private readonly object syncRoot = new object();
 
         // Whether the server is running
         private bool _bRunning = false;
@@ -57,14 +59,14 @@ namespace WslSdk
         private int _nLockCnt = 0;
 
         // The timer to trigger GC every 5 seconds
-        private System.Threading.Timer _gcTimer;
+        private Timer _gcTimer;
 
-        private NotifyIcon _notifyIcon;
+        private readonly NotifyIcon _notifyIcon;
 
-        private ContextMenuStrip _contextMenuStrip;
+        private readonly ContextMenuStrip _contextMenuStrip;
 
-        private ToolStripMenuItem _attachDebuggerMenuItem;
-        private ToolStripMenuItem _exitMenuItem;
+        private readonly ToolStripMenuItem _attachDebuggerMenuItem;
+        private readonly ToolStripMenuItem _exitMenuItem;
 
         private int _cookieWslService;
 
@@ -139,7 +141,7 @@ namespace WslSdk
             _nLockCnt = 0;
 
             // Start the GC timer to trigger GC every 5 seconds.
-            _gcTimer = new System.Threading.Timer(new TimerCallback(GarbageCollect), null, 5000, 5000);
+            _gcTimer = new Timer(new TimerCallback(GarbageCollect), null, 5000, 5000);
         }
 
         /// <summary>
@@ -148,8 +150,7 @@ namespace WslSdk
         /// </summary>
         private void RunMessageLoop()
         {
-            NativeMethods.NativeMessage msg;
-            while (NativeMethods.GetMessage(out msg, IntPtr.Zero, 0, 0))
+            while (NativeMethods.GetMessage(out NativeMethods.NativeMessage msg, IntPtr.Zero, 0, 0))
             {
                 NativeMethods.TranslateMessage(ref msg);
                 NativeMethods.DispatchMessage(ref msg);

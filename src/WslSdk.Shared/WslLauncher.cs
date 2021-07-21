@@ -253,15 +253,15 @@ namespace WslSdk.Shared
         }
 
         private bool _disposed;
-        private WslApiLoader _apiLoader;
+        private readonly WslApiLoader _apiLoader;
 
-        private int _bufferSize;
-        private SafeFileHandle _hChildStd_IN_Rd;
-        private SafeFileHandle _hChildStd_IN_Wr;
-        private SafeFileHandle _hChildStd_OUT_Rd;
-        private SafeFileHandle _hChildStd_OUT_Wr;
-        private SafeFileHandle _hChildStd_ERR_Rd;
-        private SafeFileHandle _hChildStd_ERR_Wr;
+        private readonly int _bufferSize;
+        private readonly SafeFileHandle _hChildStd_IN_Rd;
+        private readonly SafeFileHandle _hChildStd_IN_Wr;
+        private readonly SafeFileHandle _hChildStd_OUT_Rd;
+        private readonly SafeFileHandle _hChildStd_OUT_Wr;
+        private readonly SafeFileHandle _hChildStd_ERR_Rd;
+        private readonly SafeFileHandle _hChildStd_ERR_Wr;
         private Win32NativeMethods.SECURITY_ATTRIBUTES _securityAttributes;
 
         private readonly string _distroName;
@@ -301,7 +301,7 @@ namespace WslSdk.Shared
                 throw new ArgumentException("Selected stream does not support read function.", nameof(stream));
 
             long lTotal = 0L;
-            int dwRead, dwWritten;
+            int dwRead;
             bool bSuccess;
             IntPtr chBuf = IntPtr.Zero;
 
@@ -313,12 +313,16 @@ namespace WslSdk.Shared
                 {
                     byte[] buffer = new byte[_bufferSize];
                     dwRead = stream.Read(buffer, 0, buffer.Length);
-                    if (dwRead == 0) break;
+
+                    if (dwRead == 0)
+                        break;
 
                     Marshal.Copy(buffer, 0, chBuf, dwRead);
-                    bSuccess = Win32NativeMethods.WriteFile(_hChildStd_IN_Wr, chBuf, dwRead, out dwWritten, IntPtr.Zero);
+                    bSuccess = Win32NativeMethods.WriteFile(_hChildStd_IN_Wr, chBuf, dwRead, out int dwWritten, IntPtr.Zero);
                     Interlocked.Add(ref lTotal, dwWritten);
-                    if (!bSuccess) break;
+
+                    if (!bSuccess)
+                        break;
                 }
 
                 return lTotal;
@@ -326,10 +330,7 @@ namespace WslSdk.Shared
             finally
             {
                 if (chBuf != IntPtr.Zero)
-                {
                     Marshal.FreeHGlobal(chBuf);
-                    chBuf = IntPtr.Zero;
-                }
 
                 if (!_hChildStd_IN_Wr.IsInvalid && !_hChildStd_IN_Wr.IsClosed)
                 {
@@ -342,7 +343,6 @@ namespace WslSdk.Shared
         // Read output from the child process's pipe for STDOUT and write to the parent process's pipe for STDOUT. Stop when there is no more data. 
         private void ReadFromStdoutPipe(Action<byte[]> stdoutReceiver)
         {
-            int dwRead;
             bool bSuccess;
             IntPtr chBuf = IntPtr.Zero;
 
@@ -352,7 +352,7 @@ namespace WslSdk.Shared
 
                 for (; ; )
                 {
-                    bSuccess = Win32NativeMethods.ReadFile(_hChildStd_OUT_Rd, chBuf, _bufferSize, out dwRead, IntPtr.Zero);
+                    bSuccess = Win32NativeMethods.ReadFile(_hChildStd_OUT_Rd, chBuf, _bufferSize, out int dwRead, IntPtr.Zero);
                     if (!bSuccess || dwRead == 0) break;
 
                     if (stdoutReceiver != null)
@@ -366,17 +366,13 @@ namespace WslSdk.Shared
             finally
             {
                 if (chBuf != IntPtr.Zero)
-                {
                     Marshal.FreeHGlobal(chBuf);
-                    chBuf = IntPtr.Zero;
-                }
             }
         }
 
         // Read output from the child process's pipe for STDERR and write to the parent process's pipe for STDER. Stop when there is no more data. 
         private void ReadFromStderrPipe(Action<byte[]> stderrReceiver)
         {
-            int dwRead;
             bool bSuccess;
             IntPtr chBuf = IntPtr.Zero;
 
@@ -386,7 +382,7 @@ namespace WslSdk.Shared
 
                 for (; ; )
                 {
-                    bSuccess = Win32NativeMethods.ReadFile(_hChildStd_ERR_Rd, chBuf, _bufferSize, out dwRead, IntPtr.Zero);
+                    bSuccess = Win32NativeMethods.ReadFile(_hChildStd_ERR_Rd, chBuf, _bufferSize, out int dwRead, IntPtr.Zero);
                     if (!bSuccess || dwRead == 0) break;
 
                     if (stderrReceiver != null)
@@ -400,10 +396,7 @@ namespace WslSdk.Shared
             finally
             {
                 if (chBuf != IntPtr.Zero)
-                {
                     Marshal.FreeHGlobal(chBuf);
-                    chBuf = IntPtr.Zero;
-                }
             }
         }
 
