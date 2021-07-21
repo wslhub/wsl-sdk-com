@@ -10,7 +10,7 @@ You can use this OOP-style COM server to query and run WSL commands via the Wind
 
 ## How to build and test
 
-1. You can start building this project with the .NET Framework SDK v4.7.2 or higher and the Windows 10, at least 1903 or higher release.
+1. You can start building this project with the .NET Framework SDK v4.0 or higher and the Windows 10, at least 1903 or higher release.
 1. Build a release of the WslSdk project, and register the OOP COM server via elevated permission with the `Install.cmd` batch file.
 1. You can run the unit test from now on or run the sample PowerShell script to test.
    ```powershell

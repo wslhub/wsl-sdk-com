@@ -63,7 +63,7 @@ namespace WslSdk.Shared
             ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetExitCodeProcess(
-            SafeProcessHandle hProcess,
+            IntPtr hProcess,
             [MarshalAs(UnmanagedType.U4)] out int lpExitCode);
 
         [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
@@ -82,6 +82,10 @@ namespace WslSdk.Shared
 
         [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         public static extern IntPtr GetConsoleWindow();
+
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        public static extern bool CloseHandle(IntPtr hObject);
 
         [DllImport("user32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         [return: MarshalAs(UnmanagedType.Bool)]

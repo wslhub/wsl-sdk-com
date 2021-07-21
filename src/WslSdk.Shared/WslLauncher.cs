@@ -226,21 +226,30 @@ namespace WslSdk.Shared
 
         private int? Start(bool useCurrentWorkingDirectory, out long stdinWrittenByte, Stream stdin = null, Action<byte[]> stdout = null, Action<byte[]> stderr = null)
         {
-            SafeProcessHandle hProcess = CreateWslProcess(useCurrentWorkingDirectory);
-            stdinWrittenByte = 0L;
+            IntPtr hProcess = IntPtr.Zero;
 
-            if (stdin != null)
-                stdinWrittenByte = WriteToStdinPipe(stdin);
+            try
+            {
+                hProcess = CreateWslProcess(useCurrentWorkingDirectory);
+                stdinWrittenByte = 0L;
 
-            ReadFromStdoutPipe(stdout);
-            ReadFromStderrPipe(stderr);
+                if (stdin != null)
+                    stdinWrittenByte = WriteToStdinPipe(stdin);
 
-            int? result = null;
-            if (Win32NativeMethods.GetExitCodeProcess(hProcess, out int exitCode))
-                result = exitCode;
+                ReadFromStdoutPipe(stdout);
+                ReadFromStderrPipe(stderr);
 
-            hProcess.Close();
-            return result;
+                int? result = null;
+                if (Win32NativeMethods.GetExitCodeProcess(hProcess, out int exitCode))
+                    result = exitCode;
+
+                return result;
+            }
+            finally
+            {
+                if (hProcess != IntPtr.Zero)
+                    Win32NativeMethods.CloseHandle(hProcess);
+            }
         }
 
         private bool _disposed;
@@ -259,13 +268,13 @@ namespace WslSdk.Shared
         private readonly string _command;
 
         // Create a child process that uses the previously created pipes for STDIN and STDOUT.
-        private SafeProcessHandle CreateWslProcess(bool useCurrentWorkingDirectory)
+        private IntPtr CreateWslProcess(bool useCurrentWorkingDirectory)
         {
             int hr = _apiLoader.WslLaunch(_distroName, _command, useCurrentWorkingDirectory,
                 stdIn: _hChildStd_IN_Rd,
                 stdOut: _hChildStd_OUT_Wr,
                 stdErr: _hChildStd_ERR_Wr,
-                out SafeProcessHandle hProcess);
+                out IntPtr hProcess);
 
             if (hr != 0)
                 throw new COMException("Unexpected error occurred.", hr);

@@ -26,7 +26,7 @@ namespace WslSdk.Shared
         SafeFileHandle stdIn,
         SafeFileHandle stdOut,
         SafeFileHandle stdErr,
-        out SafeProcessHandle process);
+        out IntPtr process);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
     internal delegate int WslLaunchInteractiveDelegate(
