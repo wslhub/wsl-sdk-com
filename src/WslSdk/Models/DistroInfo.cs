@@ -51,7 +51,7 @@ namespace WslSdk.Models
         /// <summary>
         /// Whether the Windows file system can be mounted on the WSL distribution.
         /// </summary>
-        public bool EnableDriveMounting => DistroFlags.HasFlag(DistroFlags.EnableDriveMouting);
+        public bool EnableDriveMounting => DistroFlags.HasFlag(DistroFlags.EnableDriveMounting);
 
         /// <summary>
         /// Whether to also add the Windows PATH environment variable to the WSL distribution's PATH environment variable.

@@ -29,6 +29,6 @@ namespace WslSdk.Models
         /// <summary>
         /// Automatically mount Windows drives inside of WSL sessions (for example, "C:" will be available under "/mnt/c").
         /// </summary>
-        EnableDriveMouting = 0x4,
+        EnableDriveMounting = 0x4,
     }
 }
