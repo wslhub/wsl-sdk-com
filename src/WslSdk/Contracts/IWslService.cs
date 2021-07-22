@@ -22,6 +22,8 @@ namespace WslSdk.Contracts
 
         string GetDefaultDistroName();
 
+        DistroInfo QueryDefaultDistro();
+
         DistroInfo QueryDistroInfo(string distroName);
 
         void SetDefaultUid(string distroName, int defaultUid);

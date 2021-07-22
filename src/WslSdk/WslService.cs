@@ -102,6 +102,11 @@ namespace WslSdk
             return WslDistroManipulation.GetDefaultDistroFromRegistry()?.DistroName;
         }
 
+        public DistroInfo QueryDefaultDistro()
+        {
+            return WslDistroManipulation.QueryDefaultDistro();
+        }
+
         public DistroInfo QueryDistroInfo(string distroName)
         {
             return WslDistroManipulation.QueryDistro(distroName);
