@@ -47,12 +47,12 @@ namespace WslSdk.Test
         }
 
         [TestMethod]
-        public void Test_GetDistroList()
+        public void Test_GetDistroNames()
         {
             dynamic wslService = ActivateWslService();
-            string[] distroList = (string[])wslService.GetDistroList();
-            Assert.IsNotNull(distroList);
-            Assert.IsTrue(distroList.Length > 0);
+            string[] distroNames = (string[])wslService.GetDistroNames();
+            Assert.IsNotNull(distroNames);
+            Assert.IsTrue(distroNames.Length > 0);
         }
 
         [TestMethod]

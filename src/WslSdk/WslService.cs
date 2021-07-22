@@ -41,7 +41,7 @@ namespace WslSdk
             return WslDistroManipulation.GetDefaultDistroFromRegistry();
         }
 
-        public string[] GetDistroList()
+        public string[] GetDistroNames()
         {
             return WslDistroManipulation.EnumerateDistroFromRegistry().Select(x => x.DistroName).ToArray();
         }

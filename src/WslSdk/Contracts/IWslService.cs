@@ -12,7 +12,7 @@ namespace WslSdk.Contracts
 
         DistroRegistryInfo GetDefaultDistro();
 
-        string[] GetDistroList();
+        string[] GetDistroNames();
 
         string RunWslCommand(string distroName, string commandLine);
 

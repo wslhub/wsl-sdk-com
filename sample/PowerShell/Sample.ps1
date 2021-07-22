@@ -5,7 +5,7 @@ Pause
 
 # Get installed distro list
 Write-Output 'Currently installed WSL distro list: '
-$list = $obj.GetDistroList()
+$list = $obj.GetDistroNames()
 Write-Output $list
 Pause
 
@@ -66,7 +66,7 @@ Pause
 
 # Get installed distro list
 Write-Output 'Currently installed WSL distro list: '
-$list = $obj.GetDistroList()
+$list = $obj.GetDistroNames()
 Write-Output $list
 Pause
 
