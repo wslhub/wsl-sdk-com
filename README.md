@@ -1,5 +1,7 @@
 # Out-of-process COM server style WSL SDK
 
+[한국어 버전의 README는 이곳에서 읽으실 수 있습니다.](README.ko-kr.md)
+
 [![WSL COM SDK Build Pipeline](https://github.com/wslhub/wsl-sdk-com/actions/workflows/wsl-sdk-com-build.yml/badge.svg)](https://github.com/wslhub/wsl-sdk-com/actions/workflows/wsl-sdk-com-build.yml)
 
 ![SDK Sample Application](assets/images/wslsdk-sample-winforms-2.png)
