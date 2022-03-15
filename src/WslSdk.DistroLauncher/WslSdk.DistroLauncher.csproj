@@ -8,11 +8,12 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>WslSdk.DistroLauncher</RootNamespace>
     <AssemblyName>distrorun</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>WslSdk.DistroLauncher.Program</StartupObject>
