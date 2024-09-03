@@ -90,7 +90,7 @@ jobs:
     
     # Download build artifacts
     - name: Download build artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4.1.7
       with:
         name: 'Build Output (${{ matrix.configuration }})'
         path: '${{ env.Build_Artifact_Directory }}'
@@ -147,7 +147,7 @@ jobs:
         
     # Download build artifacts
     - name: Download build artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4.1.7
       with:
         name: 'Build Output (${{ matrix.configuration }})'
         path: '${{ env.Build_Artifact_Directory }}'
